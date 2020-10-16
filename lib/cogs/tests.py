@@ -1,5 +1,6 @@
 from discord.ext.commands import Cog
 from discord.ext.commands import command
+import discord
 # from discord.ext.commands import commands
 
 
@@ -14,11 +15,18 @@ class tests(Cog):
 
     @command(name="source")
     async def source(self, ctx):
-        await ctx.send('Shiver Bot was made by Asi4n#4243\nSource: github.com/Leo-Wang-Toronto/Shiver-Bot')
+        embed = discord.Embed(
+            title='Shiver Discord Bot',
+            description='Open source discord bot made for the chillzone discord',
+            colour=discord.Colour.blue(),
+            url='https://github.com/Leo-Wang-Toronto/Shiver-Bot'
+        )
 
-    @Cog.listener()
-    async def on_ready(self):
-        print("test cog ready")
+        embed.set_image(url='https://cdn.discordapp.com/attachments/452559141458935808/766780157708992562/snowflake2-2.jpg')
+        embed.set_footer(text='Licensed under the MIT License')
+        embed.add_field(name='Contributors:', value='From github.com/Leo-Wang-Toronto/Shiver-Bot')
+        embed.add_field(name='Asi4n#4243', value='github.com/Leo-Wang-Toronto', inline=False)
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
