@@ -30,6 +30,19 @@ class Bot(BaseBot):
     async def on_disconnect(self):
         print("Bot disconnected")
 
+    async def on_error(self, err, *args, **kwargs):
+        if err == 'on_command_error':
+            print("Something went wrong")
+        raise
+
+    async def on_command_error(self, ctx, exc):
+        if isinstance(exc, CommandNotFound):
+            await ctx.send("Command not found")
+        elif hasattr(exc, 'original'):
+            raise exc.original
+        else:
+            raise exc
+
     async def on_ready(self):
         if not self.ready:
             self.ready = True
