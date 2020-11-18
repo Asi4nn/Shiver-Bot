@@ -4,6 +4,10 @@ from discord.ext.commands import Cog
 from discord.ext.commands import command
 from discord.errors import HTTPException
 from discord import Embed, Colour
+from discord import Member
+
+# CONTRIBUTORS: add your discord tag and github link in this dictionary
+CONTRIBUTORS = {"Asi4n#5622": "github.com/Leo-Wang-Toronto"}
 
 
 class tests(Cog):
@@ -14,11 +18,11 @@ class tests(Cog):
     async def on_ready(self):
         pass
 
-    @command(name="ping")
+    @command(name="ping", brief="Get the latency between the bot and the server")
     async def ping(self, ctx):
         await ctx.send(f'Pong! {round(self.bot.latency * 1000)}ms')
 
-    @command(name="source")
+    @command(name="source", brief="Gets information about the bot with its contributors and repo")
     async def source(self, ctx):
         embed = Embed(
             title='Shiver Discord Bot',
@@ -30,10 +34,11 @@ class tests(Cog):
         embed.set_image(url='https://cdn.discordapp.com/attachments/452559141458935808/766780157708992562/snowflake2-2.jpg')
         embed.set_footer(text='Licensed under the MIT License')
         embed.add_field(name='Contributors:', value='From github.com/Leo-Wang-Toronto/Shiver-Bot')
-        embed.add_field(name='Asi4n#4243', value='github.com/Leo-Wang-Toronto', inline=False)
+        for c in CONTRIBUTORS:
+            embed.add_field(name=c, value=CONTRIBUTORS[c], inline=False)
         await ctx.send(embed=embed)
 
-    @command(name="roll", aliases=['dice'])
+    @command(name="roll", aliases=['dice'], brief="Rolls some dice of your choice!")
     async def roll_dice(self, ctx, dice_type: str):
         dice, value = [int(v) for v in dice_type.lower().split("d")]
         if dice <= 0 or value <= 0:

@@ -8,7 +8,7 @@ from discord.ext.menus import MenuPages, ListPageSource
 
 
 def syntax(command):
-    aliases = "|".join([str(command) ,*command.aliases])
+    aliases = ", ".join([str(command) ,*command.aliases])
     params = []
 
     for key, value in command.params.items():
@@ -16,7 +16,7 @@ def syntax(command):
             params.append(f"[{key}]" if "NoneType" in str(value) else f"<{key}>")
 
     params = " ".join(params)
-    return f"```{aliases} {params}```"
+    return f"```Aliases: {aliases} {params}```"
 
 
 class HelpMenu(ListPageSource):
@@ -30,8 +30,8 @@ class HelpMenu(ListPageSource):
         len_data = len(self.entries)
 
         embed = Embed(
-            title = "Help",
-            description = "Help Menu for all the commands in Shiver Bot!",
+            title = "Help Menu (/help)",
+            description = "Descriptions of all commands in Shiver Bot!",
             colour = self.ctx.author.colour
         )
 
@@ -67,10 +67,10 @@ class Help(Cog):
             description = syntax(command),
             colour = ctx.author.colour
         )
-        embed.add_field(name="Command description", value="command.help")
+        embed.add_field(name="Command description", value=command.brief)
         await ctx.send(embed=embed)
 
-    @command(name="help")
+    @command(name="help", brief="Displays info about a command or all commands in Shiver Bot")
     async def show_help(self, ctx, cmd: Optional[str]):
         if cmd is None:
             menu = MenuPages(source=HelpMenu(ctx, list(self.bot.commands)), delete_message_after=True, timeout=60.0)
