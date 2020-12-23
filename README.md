@@ -1,2 +1,2 @@
 # Shiver Bot
- Single server discord bot made for a community discord
+2nd general use discord bot
