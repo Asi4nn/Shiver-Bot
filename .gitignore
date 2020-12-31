@@ -1,2 +1,4 @@
 TOKEN.txt
 *.pyc
+.venv
+.idea
