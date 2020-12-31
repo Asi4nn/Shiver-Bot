@@ -1,6 +1,4 @@
-CREATE TABLE IF NOT EXISTS exp(
+CREATE TABLE IF NOT EXISTS birthdays (
     UserID integer PRIMARY KEY,
-    XP integer,
-    Level integer
-    XPLock test DEFAULT CURRENT_TIMESTAMP
+    date text
 );

@@ -1,5 +1,7 @@
 from random import randint
+import re
 
+from ..db import db
 from discord.ext.commands import Cog
 from discord.ext.commands import command
 from discord.errors import HTTPException
@@ -31,7 +33,8 @@ class tests(Cog):
             url='https://github.com/Leo-Wang-Toronto/Shiver-Bot'
         )
 
-        embed.set_image(url='https://cdn.discordapp.com/attachments/452559141458935808/766780157708992562/snowflake2-2.jpg')
+        embed.set_image(url='https://cdn.discordapp.com/attachments/452559141458935808/766780157708992562/snowflake2'
+                            '-2.jpg')
         embed.set_footer(text='Licensed under the MIT License')
         embed.add_field(name='Contributors:', value='From github.com/Leo-Wang-Toronto/Shiver-Bot')
         for c in CONTRIBUTORS:
@@ -53,6 +56,23 @@ class tests(Cog):
     async def roll_dice_error(self, ctx, exc):
         if isinstance(exc.original, HTTPException):
             await ctx.send("Result is too large D:")
+
+    @command(name="birthday", aliases=["bday"], brief="Adds birthday notification for the given user, date must be in "
+                                                      "form DD/MM/YYYY")
+    async def birthday(self, ctx, mention, date):
+        mention = mention.strip()
+        date = date.strip()
+        if self.validateBirthday(mention, date):
+            db.execute("INSERT OR REPLACE INTO birthdays(UserId, date) VALUES (?, ?)", mention[3:len(mention)-1], date);
+            await ctx.send(f"Added birthdate {date} for {mention}")
+        else:
+            await ctx.send("Invalid date format! (must be in form DD/MM/YYYY)")
+
+    @staticmethod
+    def validateBirthday(mention, date):
+        if re.fullmatch("<@!\d{18}>", mention) is not None and re.fullmatch("\d\d/\d\d/\d\d\d\d", date) is not None:
+            return True
+        return False
 
 
 def setup(bot):

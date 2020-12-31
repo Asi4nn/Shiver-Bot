@@ -10,6 +10,7 @@ BUILD_PATH = "./data/db/build.sql"
 cxn = connect(DB_PATH, check_same_thread=False)
 cur = cxn.cursor()
 
+
 def with_commit(func):
     def inner(*args, **kwargs):
         func(*args, **kwargs)
@@ -35,7 +36,7 @@ def autosave(sch):
 
 
 def close():
-    cxm.close()
+    cxn.close()
 
 
 def field(command, *values):
@@ -53,7 +54,7 @@ def record(command, *values):
 
 
 def records(commands, *values):
-    cur.execute(command, tuple(values))
+    cur.execute(commands, tuple(values))
 
     return cur.fetchall()
 
@@ -62,6 +63,10 @@ def column(command, *values):
     cur.execute(command, *values)
 
     return [item[0] for item in cur.fetchall()]
+
+
+def execute(command, *values):
+    cur.execute(command, tuple(values))
 
 
 def multiexec(command, value_set):

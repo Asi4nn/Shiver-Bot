@@ -1,4 +1,3 @@
-
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from asyncio import sleep
@@ -28,7 +27,7 @@ class Bot(BaseBot):
     def __init__(self):
         self.ready = False
         self.prefix = PREFIX
-        self.guild = None
+        # self.guild = None
         self.scheduler = AsyncIOScheduler()
 
         db.autosave(self.scheduler)
@@ -65,8 +64,10 @@ class Bot(BaseBot):
         raise
 
     async def on_command_error(self, ctx, exc):
-        if any([isinstance(exc, error) for error in IGNORE_EXCEPTIONS]):
-            pass
+        if isinstance(exc, CommandNotFound):
+            await ctx.send("Command not found, type /help for a list of commands")
+        elif isinstance(exc, BadArgument):
+            await ctx.send("Bad argument, type /help for a list of commands")
         elif isinstance(exc, MissingRequiredArgument):
             await ctx.send("Argument(s) are missing from command")
         elif isinstance(exc.original, HTTPException):
@@ -78,8 +79,8 @@ class Bot(BaseBot):
 
     async def on_ready(self):
         if not self.ready:
-            self.guild = self.get_guild(636310389797290024)
-            self.scheduler.add_job(self.print_message, CronTrigger(second="0", minute="0"))
+            # self.guild = self.get_guild(636310389797290024)
+            # self.scheduler.add_job(self.print_message, CronTrigger(second="0", minute="0"))
             self.scheduler.start()
 
             self.ready = True
