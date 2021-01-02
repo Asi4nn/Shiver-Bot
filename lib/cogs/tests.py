@@ -4,6 +4,7 @@ import re
 from ..db import db
 from discord.ext.commands import Cog
 from discord.ext.commands import command
+from discord.ext.commands import has_permissions
 from discord.errors import HTTPException
 from discord import Embed, Colour
 from discord import Member
@@ -57,22 +58,18 @@ class tests(Cog):
         if isinstance(exc.original, HTTPException):
             await ctx.send("Result is too large D:")
 
-    @command(name="birthday", aliases=["bday"], brief="Adds birthday notification for the given user, date must be in "
-                                                      "form DD/MM/YYYY")
-    async def birthday(self, ctx, mention, date):
-        mention = mention.strip()
-        date = date.strip()
-        if self.validateBirthday(mention, date):
-            db.execute("INSERT OR REPLACE INTO birthdays(UserId, date) VALUES (?, ?)", mention[3:len(mention)-1], date);
-            await ctx.send(f"Added birthdate {date} for {mention}")
-        else:
-            await ctx.send("Invalid date format! (must be in form DD/MM/YYYY)")
+    @command(name="at_everyone")
+    async def at_everyone(self, ctx):
+        await ctx.send("@everyone")
 
-    @staticmethod
-    def validateBirthday(mention, date):
-        if re.fullmatch("<@!\d{18}>", mention) is not None and re.fullmatch("\d\d/\d\d/\d\d\d\d", date) is not None:
-            return True
-        return False
+    @command(name="channel", brief="Set the channel for announcements")
+    @has_permissions(manage_guild=True)
+    async def channel(self, ctx):
+        try:
+            db.execute("INSERT OR REPLACE INTO channels(GuildID, channel) VALUES (?, ?)", ctx.guild.id, ctx.channel.id)
+            await ctx.send(f"Set the announcement channel to {ctx.channel.name}")
+        except:
+            await ctx.send("Failed to set channel")
 
 
 def setup(bot):

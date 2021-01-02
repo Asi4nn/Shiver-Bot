@@ -4,23 +4,29 @@ from asyncio import sleep
 from datetime import datetime
 
 from discord.ext.commands import Bot as BaseBot
+from discord.ext.commands import when_mentioned_or
 from discord.ext.commands import Context
 from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument)
 from discord.errors import HTTPException, Forbidden
+from discord.utils import get
 
 from ..helpers.getTime import get_current_time
 from ..db import db
 
-import os
+from os import listdir
 
 PREFIX = '/'
 OWNER_IDS = [164144088818515968]
 COGS = []
 IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
 
-for filename in os.listdir('./lib/cogs'):
+for filename in listdir('./lib/cogs'):
     if filename.endswith('.py'):
         COGS.append(f'lib.cogs.{filename[:-3]}')
+
+
+def get_prefix(client, message):
+    return when_mentioned_or(PREFIX)(client, message)
 
 
 class Bot(BaseBot):
@@ -31,7 +37,7 @@ class Bot(BaseBot):
         self.scheduler = AsyncIOScheduler()
 
         db.autosave(self.scheduler)
-        super().__init__(command_prefix=PREFIX, owner_ids=OWNER_IDS)
+        super().__init__(command_prefix=get_prefix, owner_ids=OWNER_IDS)
 
     def run(self):
         with open('lib/bot/TOKEN.txt', 'r', encoding="utf-8") as token:
@@ -48,9 +54,23 @@ class Bot(BaseBot):
             self.load_extension(cog)
             print(get_current_time(), f'Loaded cog: {cog}')
 
-    async def print_message(self):
-        channel = self.get_channel(636378952025374794)
-        await channel.send("Hourly message trigger")
+    async def announce_birthday(self, guild, channel, mention, age):
+        send_channel = get(self.get_guild(guild).text_channels, id=channel)
+        await send_channel.send(f"@everyone Happy Birthday to {mention} who's turning {age} today!")
+
+    async def birthday_trigger(self):
+        bdays = db.column("SELECT date FROM birthdays")
+        users = db.column("SELECT UserID FROM birthdays")
+        user_guilds = db.column("SELECT GuildID FROM birthdays")
+        channels = db.column("SELECT channel FROM channels")
+        guildIDs = db.column("SELECT GuildID FROM channels")
+
+        for i in range(len(bdays)):
+            if int(bdays[i][0:2]) == datetime.today().day and int(bdays[i][3:5]) == datetime.today().month:
+                channel = channels[guildIDs.index(user_guilds[i])]
+                age = datetime.today().year - int(bdays[i][6:])
+                await self.announce_birthday(user_guilds[i], int(channel), f'<@!{users[i]}>', age)
+
 
     async def on_connect(self):
         print(get_current_time(), "Logged in as {0.user}".format(self))
@@ -79,8 +99,7 @@ class Bot(BaseBot):
 
     async def on_ready(self):
         if not self.ready:
-            # self.guild = self.get_guild(636310389797290024)
-            # self.scheduler.add_job(self.print_message, CronTrigger(second="0", minute="0"))
+            self.scheduler.add_job(self.birthday_trigger, CronTrigger(second="0", minute="0", hour="0"))
             self.scheduler.start()
 
             self.ready = True
@@ -88,6 +107,7 @@ class Bot(BaseBot):
         else:
             print(get_current_time(), "Bot reconnected")
 
+    # YOU NEED THIS FOR COMMANDS TO WORK
     async def on_message(self, message):
         if not message.author.bot:
             await self.process_commands(message)
