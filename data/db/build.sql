@@ -11,5 +11,10 @@ CREATE TABLE IF NOT EXISTS channels (
 
 CREATE TABLE IF NOT EXISTS messages (
     MessageID integer PRIMARY KEY,
-    message text
+    guild text,
+    channel text,
+    author text,
+    time text,
+    message text,
+    status text
 );
