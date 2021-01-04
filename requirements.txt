@@ -1,4 +1,4 @@
 discord
-discord-ext-menus
+git+https://github.com/Rapptz/discord-ext-menus
 APScheduler==3.6.3
 async-timeout==3.0.1
