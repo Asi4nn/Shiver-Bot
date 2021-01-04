@@ -21,7 +21,7 @@ class Log(Cog):
     async def on_message_delete(self, message: Message):
         if not message.author.bot:
             time = message.created_at.strftime("%D/%M/%Y [%H:%M:%S]")
-            db.execute("INSERT OR REPLACE INTO messages (MessageID, guild, channel, time, author, message, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+            db.execute("INSERT OR REPLACE INTO messages (MessageID, guild, channel, authot, time, message, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
                        message.id, message.guild.name, message.channel.name, message.author.name, time, message.content, "DELETED")
 
     @Cog.listener()
