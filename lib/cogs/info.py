@@ -8,9 +8,12 @@ from discord.ext.commands import Cog
 from discord.ext.commands import command
 from discord import Embed
 from discord import Member
+from discord.colour import Colour
+from discord.ext.commands import Context
 
 est = timezone("US/Eastern")
 utc = utc
+
 
 class Info(Cog):
     def __init__(self, bot):
@@ -21,7 +24,7 @@ class Info(Cog):
         pass
 
     @command(name="userinfo", aliases=['ui', 'whois'], brief="Gets info about a user in the server")
-    async def user_info(self, ctx, target:Optional[Member]):
+    async def user_info(self, ctx: Context, target: Optional[Member]):
         target = target or ctx.author
 
         embed = Embed(
@@ -52,8 +55,31 @@ class Info(Cog):
         await ctx.send(embed=embed)
 
     @command(name="serverinfo", aliases=["guildinfo", "si", "gi"], brief="Gets info about the server")
-    async def server_info(self, ctx):
-        pass
+    async def server_info(self, ctx: Context):
+        target = ctx.guild
+
+        embed = Embed(
+            title=target.name,
+            colour=Colour.from_rgb(255, 255, 0),
+            timestamp=datetime.now().astimezone(est)
+        )
+        embed.set_thumbnail(url=target.icon_url)
+
+        created = target.created_at
+        created = utc.localize(created)
+
+        fields = [
+            ("ID", target.id, False),
+            ("Roles", ', '.join([role.mention for role in target.roles if str(role) != "@everyone"]), True),
+            ("Region", target.region, False),
+            ("Created", created.astimezone(est).strftime("%d/%m/%Y, %H:%M:%S"), True),
+            ("Total Members", target.member_count, True),
+        ]
+
+        for name, value, inline in fields:
+            embed.add_field(name=name, value=value, inline=inline)
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot):
