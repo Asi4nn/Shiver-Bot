@@ -56,7 +56,7 @@ class Bot(BaseBot):
 
     async def announce_birthday(self, guild, channel, mention, age):
         send_channel = get(self.get_guild(guild).text_channels, id=channel)
-        await send_channel.send(f"@everyone Happy Birthday to {mention} who's turning {age} today!")
+        await send_channel.send(f"@here Happy Birthday to {mention} who's turning {age} today!")
 
     async def birthday_trigger(self):
         bdays = db.column("SELECT date FROM birthdays")
@@ -99,6 +99,7 @@ class Bot(BaseBot):
 
     async def on_ready(self):
         if not self.ready:
+            # Daily birthday checker
             self.scheduler.add_job(self.birthday_trigger, CronTrigger(second="0", minute="0", hour="0"))
             self.scheduler.start()
 
