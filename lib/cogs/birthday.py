@@ -1,6 +1,6 @@
 from discord.ext.commands import Cog
 from discord.ext.commands import command
-from discord.ext.commands import has_permissions, MissingPermissions
+from discord.ext.commands import has_permissions
 
 from re import fullmatch
 from datetime import datetime

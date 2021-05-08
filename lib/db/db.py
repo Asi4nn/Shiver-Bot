@@ -1,11 +1,16 @@
-from os.path import isfile
+from os.path import isfile, dirname, abspath, join
 from sqlite3 import connect
 from datetime import datetime
 
 from apscheduler.triggers.cron import CronTrigger
 
-DB_PATH = "./data/db/database.db"
-BUILD_PATH = "./data/db/build.sql"
+BASE_DIR = dirname(abspath(__file__))
+BUILD_PATH = join(BASE_DIR, "build.sql")
+DB_PATH = join(BASE_DIR, "database.db")
+if not isfile(DB_PATH):
+    raise FileNotFoundError("assignment3.db not found")
+if not isfile(BUILD_PATH):
+    raise FileNotFoundError("build.sql not found")
 
 cxn = connect(DB_PATH, check_same_thread=False)
 cur = cxn.cursor()
