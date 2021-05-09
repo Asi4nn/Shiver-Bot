@@ -4,11 +4,12 @@ from datetime import datetime
 
 from apscheduler.triggers.cron import CronTrigger
 
-BASE_DIR = dirname(abspath(__file__))
+BASE_DIR = join(dirname(abspath(__file__)), "..\..\data\db")
 BUILD_PATH = join(BASE_DIR, "build.sql")
 DB_PATH = join(BASE_DIR, "database.db")
+print(BASE_DIR)
 if not isfile(DB_PATH):
-    raise FileNotFoundError("assignment3.db not found")
+    raise FileNotFoundError("database.db not found")
 if not isfile(BUILD_PATH):
     raise FileNotFoundError("build.sql not found")
 
