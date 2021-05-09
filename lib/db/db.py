@@ -1,10 +1,11 @@
 from os.path import isfile, dirname, abspath, join
+from os import chdir
 from sqlite3 import connect
 from datetime import datetime
 
 from apscheduler.triggers.cron import CronTrigger
 
-BASE_DIR = join(dirname(abspath(__file__)), "..\..\data\db")
+BASE_DIR = join(dirname(abspath(__file__)), "../../data/db/")
 BUILD_PATH = join(BASE_DIR, "build.sql")
 DB_PATH = join(BASE_DIR, "database.db")
 print(BASE_DIR)
