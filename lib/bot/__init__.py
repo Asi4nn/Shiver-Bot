@@ -46,6 +46,7 @@ class Bot(BaseBot):
         self.load_cogs()
 
         print(get_current_time(), "Bot is running")
+        db_postgresql.connect()
 
         super().run(self.token, reconnect=True)
 

@@ -5,31 +5,41 @@ from apscheduler.triggers.cron import CronTrigger
 
 DATABASE_URL = environ['DATABASE_URL']
 
-cxn = psycopg2.connect(database=DATABASE_URL, sslmode='require')
-cur = cxn.cursor()
+cxn = None
+cur = None
 
-# create the db for the first time
-cur.execute('''CREATE TABLE IF NOT EXISTS birthdays (
-                    UserID integer PRIMARY KEY,
-                    GuildID integer,
-                    date text
-                );
-                
-                CREATE TABLE IF NOT EXISTS channels (
-                    GuildID integer PRIMARY KEY,
-                    channel integer
-                );
-                
-                CREATE TABLE IF NOT EXISTS messages (
-                    MessageID integer PRIMARY KEY,
-                    guild text,
-                    channel text,
-                    author text,
-                    time text,
-                    message text,
-                    status text
-                );''')
-cxn.commit()
+
+def connect():
+    global cxn
+    global cur
+    cxn = psycopg2.connect(database=DATABASE_URL, sslmode='require')
+    cur = cxn.cursor()
+
+    # create the db for the first time
+    cur.execute('''CREATE TABLE IF NOT EXISTS birthdays (
+                        UserID integer PRIMARY KEY,
+                        GuildID integer,
+                        date text
+                    );
+
+                    CREATE TABLE IF NOT EXISTS channels (
+                        GuildID integer PRIMARY KEY,
+                        channel integer
+                    );
+
+                    CREATE TABLE IF NOT EXISTS messages (
+                        MessageID integer PRIMARY KEY,
+                        guild text,
+                        channel text,
+                        author text,
+                        time text,
+                        message text,
+                        status text
+                    );''')
+    cxn.commit()
+
+    time = datetime.now().strftime("[%H:%M:%S]")
+    print(time, "Connected to Database")
 
 
 def commit():
