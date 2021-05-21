@@ -1,35 +1,35 @@
-from os.path import isfile, dirname, abspath, join
-from os import chdir
-from sqlite3 import connect
+import psycopg2
+from os import environ
 from datetime import datetime
-
 from apscheduler.triggers.cron import CronTrigger
 
-BASE_DIR = join(dirname(abspath(__file__)), "../../data/db/")
-BUILD_PATH = join(BASE_DIR, "build.sql")
-DB_PATH = join(BASE_DIR, "database.db")
-print(BASE_DIR)
-if not isfile(DB_PATH):
-    raise FileNotFoundError("database.db not found")
-if not isfile(BUILD_PATH):
-    raise FileNotFoundError("build.sql not found")
+DATABASE_URL = environ['DATABASE_URL']
 
-cxn = connect(DB_PATH, check_same_thread=False)
+cxn = psycopg2.connect(database=DATABASE_URL, sslmode='require')
 cur = cxn.cursor()
 
-
-def with_commit(func):
-    def inner(*args, **kwargs):
-        func(*args, **kwargs)
-        commit()
-
-    return inner
-
-
-@with_commit
-def build():
-    if isfile(BUILD_PATH):
-        scriptexec(BUILD_PATH)
+# create the db for the first time
+cur.execute('''CREATE TABLE IF NOT EXISTS birthdays (
+                    UserID integer PRIMARY KEY,
+                    GuildID integer,
+                    date text
+                );
+                
+                CREATE TABLE IF NOT EXISTS channels (
+                    GuildID integer PRIMARY KEY,
+                    channel integer
+                );
+                
+                CREATE TABLE IF NOT EXISTS messages (
+                    MessageID integer PRIMARY KEY,
+                    guild text,
+                    channel text,
+                    author text,
+                    time text,
+                    message text,
+                    status text
+                );''')
+cxn.commit()
 
 
 def commit():
@@ -78,8 +78,3 @@ def execute(command, *values):
 
 def multiexec(command, value_set):
     cur.executemany(command, value_set)
-
-
-def scriptexec(path):
-    with open(path, 'r', encoding='utf-8') as script:
-        cur.executescript(script.read())

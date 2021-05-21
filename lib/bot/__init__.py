@@ -11,7 +11,7 @@ from discord.errors import HTTPException, Forbidden
 from discord.utils import get
 
 from ..helpers.getTime import get_current_time
-from ..db import db
+from ..db import db_postgresql
 
 from os import listdir
 
@@ -36,7 +36,7 @@ class Bot(BaseBot):
         # self.guild = None
         self.scheduler = AsyncIOScheduler()
 
-        db.autosave(self.scheduler)
+        db_postgresql.autosave(self.scheduler)
         super().__init__(command_prefix=get_prefix, owner_ids=OWNER_IDS)
 
     def run(self):
@@ -59,11 +59,11 @@ class Bot(BaseBot):
         await send_channel.send(f"@here Happy Birthday to {mention} who's turning {age} today!")
 
     async def birthday_trigger(self):
-        bdays = db.column("SELECT date FROM birthdays")
-        users = db.column("SELECT UserID FROM birthdays")
-        user_guilds = db.column("SELECT GuildID FROM birthdays")
-        channels = db.column("SELECT channel FROM channels")
-        guildIDs = db.column("SELECT GuildID FROM channels")
+        bdays = db_postgresql.column("SELECT date FROM birthdays")
+        users = db_postgresql.column("SELECT UserID FROM birthdays")
+        user_guilds = db_postgresql.column("SELECT GuildID FROM birthdays")
+        channels = db_postgresql.column("SELECT channel FROM channels")
+        guildIDs = db_postgresql.column("SELECT GuildID FROM channels")
 
         for i in range(len(bdays)):
             if int(bdays[i][0:2]) == datetime.today().day and int(bdays[i][3:5]) == datetime.today().month:

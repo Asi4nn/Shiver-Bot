@@ -5,7 +5,7 @@ from discord.ext.commands import has_permissions
 from re import fullmatch
 from datetime import datetime
 
-from ..db import db
+from ..db import db_sqlite
 
 
 class Birthday(Cog):
@@ -19,7 +19,7 @@ class Birthday(Cog):
         mention = mention.strip()
         date = date.strip()
         if self.validate_birthday(mention, date):
-            db.execute("INSERT OR REPLACE INTO birthdays(UserID, GuildID, date) VALUES (?, ?, ?)",
+            db_sqlite.execute("INSERT OR REPLACE INTO birthdays(UserID, GuildID, date) VALUES (?, ?, ?)",
                        mention[3:len(mention) - 1], ctx.guild.id, date)
             await ctx.send(f"Added birthdate {date} for {mention}")
         else:
@@ -28,7 +28,7 @@ class Birthday(Cog):
     @command(name="birthday_check", aliases=["bdaycheck"], brief="Checks birthdate for the given user in the form DD/MM/YYYY")
     async def birthday_check(self, ctx, mention):
         mention = mention.strip()
-        record = db.record("SELECT * FROM birthdays WHERE UserID = ? AND GuildID = ?", mention[3:len(mention) - 1], ctx.guild.id)
+        record = db_sqlite.record("SELECT * FROM birthdays WHERE UserID = ? AND GuildID = ?", mention[3:len(mention) - 1], ctx.guild.id)
         if record is None:
             await ctx.send("This this user has no recorded birthdate")
         else:

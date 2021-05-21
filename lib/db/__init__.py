@@ -1,3 +1,3 @@
-from . import db
+from . import db_sqlite
 
-db.build()
+db_sqlite.build()

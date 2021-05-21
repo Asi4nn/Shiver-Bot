@@ -1,7 +1,7 @@
 from random import randint
 import re
 
-from ..db import db
+from ..db import db_sqlite
 from discord.ext.commands import Cog
 from discord.ext.commands import command
 from discord.ext.commands import has_permissions
@@ -66,7 +66,7 @@ class tests(Cog):
     @has_permissions(manage_guild=True)
     async def channel(self, ctx):
         try:
-            db.execute("INSERT OR REPLACE INTO channels(GuildID, channel) VALUES (?, ?)", ctx.guild.id, ctx.channel.id)
+            db_sqlite.execute("INSERT OR REPLACE INTO channels(GuildID, channel) VALUES (?, ?)", ctx.guild.id, ctx.channel.id)
             await ctx.send(f"Set the announcement channel to {ctx.channel.name}")
         except:
             await ctx.send("Failed to set channel")
