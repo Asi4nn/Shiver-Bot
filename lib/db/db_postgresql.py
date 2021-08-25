@@ -3,16 +3,22 @@ from os import environ
 from datetime import datetime
 from apscheduler.triggers.cron import CronTrigger
 
-DATABASE_URL = environ['DATABASE_URL']
+try:
+    DATABASE_URL = environ['DATABASE_URL']
+except KeyError:
+    DATABASE_URL = "postgres"
 
 cxn = None
 cur = None
 
 
-def connect():
+async def connect():
     global cxn
     global cur
-    cxn = psycopg2.connect(database=DATABASE_URL, sslmode='require')
+    if DATABASE_URL == "postgres":
+        cxn = psycopg2.connect(database=DATABASE_URL, user="postgres", password="Leowang14", host="127.0.0.1", port="5432")
+    else:
+        cxn = psycopg2.connect(database=DATABASE_URL, sslmode='require')
     cur = cxn.cursor()
 
     # create the db for the first time
