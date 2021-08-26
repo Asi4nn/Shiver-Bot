@@ -2,22 +2,24 @@ import psycopg2
 from os import environ
 from datetime import datetime
 from apscheduler.triggers.cron import CronTrigger
+from sqlalchemy import create_engine
 
-DATABASE_URL = environ['DATABASE_URL']
-time = datetime.now().strftime("[%H:%M:%S]")
+try:
+    DATABASE_URL = environ['DATABASE_URL']
+except KeyError:
+    DATABASE_URL = "postgresql+psycopg2://postgres:Leowang14@127.0.0.1:5432/postgres"
 
-cxn = None
-cur = None
+engine = create_engine(DATABASE_URL, echo=False)
+
+conn = None
 
 
 def connect():
-    global cxn
-    global cur
-    cxn = psycopg2.connect(database=DATABASE_URL)
-    cur = cxn.cursor()
+    global conn
+    conn = engine.connect().execution_options(autocommit=True)
 
     # create the db for the first time
-    cur.execute('''CREATE TABLE IF NOT EXISTS birthdays (
+    conn.execute('''CREATE TABLE IF NOT EXISTS birthdays (
                         UserID integer PRIMARY KEY,
                         GuildID integer,
                         date text
@@ -37,8 +39,8 @@ def connect():
                         message text,
                         status text
                     );''')
-    cxn.commit()
 
+    # conn.commit()
     time = datetime.now().strftime("[%H:%M:%S]")
     print(time, "Connected to Database")
 
@@ -46,7 +48,7 @@ def connect():
 def commit():
     time = datetime.now().strftime("[%H:%M:%S]")
     print(time, "Saving to Database")
-    cxn.commit()
+    # conn.commit()
 
 
 def autosave(sch):
@@ -54,38 +56,39 @@ def autosave(sch):
 
 
 def close():
-    cxn.close()
+    time = datetime.now().strftime("[%H:%M:%S]")
+    print(time, "Closing connection to database")
 
 
 def field(command, *values):
-    cur.execute(command, tuple(values))
+    conn.execute(command, tuple(values))
 
-    fetch = cur.fetchone()
+    fetch = conn.fetchone()
     if fetch is not None:
         return fetch[0]
 
 
 def record(command, *values):
-    cur.execute(command, tuple(values))
+    conn.execute(command, tuple(values))
 
-    return cur.fetchone()
+    return conn.fetchone()
 
 
 def records(commands, *values):
-    cur.execute(commands, tuple(values))
+    conn.execute(commands, tuple(values))
 
-    return cur.fetchall()
+    return conn.fetchall()
 
 
 def column(command, *values):
-    cur.execute(command, *values)
+    conn.execute(command, *values)
 
-    return [item[0] for item in cur.fetchall()]
+    return [item[0] for item in conn.fetchall()]
 
 
 def execute(command, *values):
-    cur.execute(command, tuple(values))
+    conn.execute(command, tuple(values))
 
 
 def multiexec(command, value_set):
-    cur.executemany(command, value_set)
+    conn.executemany(command, value_set)

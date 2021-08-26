@@ -14,7 +14,7 @@ if not isfile(BUILD_PATH):
     raise FileNotFoundError("build.sql not found")
 
 cxn = connect(DB_PATH, check_same_thread=False)
-cur = cxn.cursor()
+conn = cxn.cursor()
 
 
 def with_commit(func):
@@ -46,39 +46,39 @@ def close():
 
 
 def field(command, *values):
-    cur.execute(command, tuple(values))
+    conn.execute(command, tuple(values))
 
-    fetch = cur.fetchone()
+    fetch = conn.fetchone()
     if fetch is not None:
         return fetch[0]
 
 
 def record(command, *values):
-    cur.execute(command, tuple(values))
+    conn.execute(command, tuple(values))
 
-    return cur.fetchone()
+    return conn.fetchone()
 
 
 def records(commands, *values):
-    cur.execute(commands, tuple(values))
+    conn.execute(commands, tuple(values))
 
-    return cur.fetchall()
+    return conn.fetchall()
 
 
 def column(command, *values):
-    cur.execute(command, *values)
+    conn.execute(command, *values)
 
-    return [item[0] for item in cur.fetchall()]
+    return [item[0] for item in conn.fetchall()]
 
 
 def execute(command, *values):
-    cur.execute(command, tuple(values))
+    conn.execute(command, tuple(values))
 
 
 def multiexec(command, value_set):
-    cur.executemany(command, value_set)
+    conn.executemany(command, value_set)
 
 
 def scriptexec(path):
     with open(path, 'r', encoding='utf-8') as script:
-        cur.executescript(script.read())
+        conn.executescript(script.read())
