@@ -5,7 +5,6 @@ from apscheduler.triggers.cron import CronTrigger
 
 DATABASE_URL = environ['DATABASE_URL']
 time = datetime.now().strftime("[%H:%M:%S]")
-print(time, "Connecting to url:", DATABASE_URL)
 
 cxn = None
 cur = None
@@ -14,7 +13,7 @@ cur = None
 def connect():
     global cxn
     global cur
-    cxn = psycopg2.connect(database=DATABASE_URL, sslmode='require')
+    cxn = psycopg2.connect(database=DATABASE_URL)
     cur = cxn.cursor()
 
     # create the db for the first time
