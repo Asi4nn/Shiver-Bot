@@ -6,6 +6,8 @@ from sqlalchemy import create_engine
 
 try:
     DATABASE_URL = environ['DATABASE_URL']
+    split = DATABASE_URL.split("//")
+    DATABASE_URL = "postgresql+psycopg2://" + split[1]
 except KeyError:
     DATABASE_URL = "postgresql+psycopg2://postgres:Leowang14@127.0.0.1:5432/postgres"
 
