@@ -12,7 +12,7 @@ cxn = None
 cur = None
 
 
-async def connect():
+def connect():
     global cxn
     global cur
     if DATABASE_URL == "postgres":
