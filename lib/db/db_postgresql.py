@@ -7,6 +7,8 @@ try:
     DATABASE_URL = environ['DATABASE_URL']
 except KeyError:
     DATABASE_URL = "postgres"
+time = datetime.now().strftime("[%H:%M:%S]")
+print(time, "Connecting to url:", DATABASE_URL)
 
 cxn = None
 cur = None
