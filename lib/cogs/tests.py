@@ -58,10 +58,6 @@ class tests(Cog):
         if isinstance(exc.original, HTTPException):
             await ctx.send("Result is too large D:")
 
-    @command(name="at_everyone")
-    async def at_everyone(self, ctx):
-        await ctx.send("@everyone")
-
     @command(name="channel", brief="Set the channel for announcements")
     @has_permissions(manage_guild=True)
     async def channel(self, ctx):
