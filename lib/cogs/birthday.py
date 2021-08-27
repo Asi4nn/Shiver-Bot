@@ -5,7 +5,7 @@ from discord.ext.commands import has_permissions
 from re import fullmatch
 from datetime import datetime
 
-from ..db import db_sqlite
+from lib.db import db_postgresql
 
 
 class Birthday(Cog):
@@ -19,20 +19,27 @@ class Birthday(Cog):
         mention = mention.strip()
         date = date.strip()
         if self.validate_birthday(mention, date):
-            db_sqlite.execute("INSERT OR REPLACE INTO birthdays(UserID, GuildID, date) VALUES (?, ?, ?)",
-                       mention[3:len(mention) - 1], ctx.guild.id, date)
+            db_postgresql.execute("INSERT INTO birthdays(UserID, GuildID, date) "
+                                  "VALUES (%s, %s, %s) "
+                                  "ON CONFLICT(UserID) "
+                                  "DO UPDATE SET date = %s",
+                                  int(mention[3:len(mention) - 1]), ctx.guild.id, date, date)
             await ctx.send(f"Added birthdate {date} for {mention}")
         else:
             await ctx.send("Invalid format! (Type /help for syntax)")
 
-    @command(name="birthday_check", aliases=["bdaycheck"], brief="Checks birthdate for the given user in the form DD/MM/YYYY")
+    @command(name="birthday_check", aliases=["bdaycheck"],
+             brief="Checks birthdate for the given user in the form DD/MM/YYYY")
     async def birthday_check(self, ctx, mention):
         mention = mention.strip()
-        record = db_sqlite.record("SELECT * FROM birthdays WHERE UserID = ? AND GuildID = ?", mention[3:len(mention) - 1], ctx.guild.id)
+        record = db_postgresql.record("SELECT * FROM birthdays WHERE UserID = %s AND GuildID = %s",
+                                      int(mention[3:len(mention) - 1]), ctx.guild.id)
         if record is None:
-            await ctx.send("This this user has no recorded birthdate")
+            await ctx.send("This this user has no recorded birth date")
         else:
-            await ctx.send(f"{mention}'s birthdate is on {record[2]}")
+            date = record[2].split("/")
+            date = datetime(day=int(date[0]), month=int(date[1]), year=int(date[2]))
+            await ctx.send(f"{mention}'s birth date is on {date.strftime('%B %d, %Y')}")
 
     @staticmethod
     def validate_birthday(mention, date):

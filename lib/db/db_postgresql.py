@@ -1,8 +1,7 @@
-import psycopg2
 from os import environ
 from datetime import datetime
-from apscheduler.triggers.cron import CronTrigger
 from sqlalchemy import create_engine
+from sqlalchemy.engine.mock import MockConnection
 
 try:
     DATABASE_URL = environ['DATABASE_URL']
@@ -13,7 +12,7 @@ except KeyError:
 
 engine = create_engine(DATABASE_URL, echo=False)
 
-conn = None
+conn: MockConnection = None
 
 
 def connect():
@@ -22,18 +21,18 @@ def connect():
 
     # create the db for the first time
     conn.execute('''CREATE TABLE IF NOT EXISTS birthdays (
-                        UserID integer PRIMARY KEY,
-                        GuildID integer,
+                        UserID bigint PRIMARY KEY,
+                        GuildID bigint,
                         date text
                     );
 
                     CREATE TABLE IF NOT EXISTS channels (
-                        GuildID integer PRIMARY KEY,
-                        channel integer
+                        GuildID bigint PRIMARY KEY,
+                        channel bigint
                     );
 
                     CREATE TABLE IF NOT EXISTS messages (
-                        MessageID integer PRIMARY KEY,
+                        MessageID bigint PRIMARY KEY,
                         guild text,
                         channel text,
                         author text,
@@ -42,19 +41,8 @@ def connect():
                         status text
                     );''')
 
-    # conn.commit()
     time = datetime.now().strftime("[%H:%M:%S]")
     print(time, "Connected to Database")
-
-
-def commit():
-    time = datetime.now().strftime("[%H:%M:%S]")
-    print(time, "Saving to Database")
-    # conn.commit()
-
-
-def autosave(sch):
-    sch.add_job(commit, CronTrigger(second=0))
 
 
 def close():
@@ -63,29 +51,29 @@ def close():
 
 
 def field(command, *values):
-    conn.execute(command, tuple(values))
+    res = conn.execute(command, tuple(values))
 
-    fetch = conn.fetchone()
+    fetch = res.fetchone()
     if fetch is not None:
         return fetch[0]
 
 
 def record(command, *values):
-    conn.execute(command, tuple(values))
+    res = conn.execute(command, values)
 
-    return conn.fetchone()
+    return res.fetchone()
 
 
 def records(commands, *values):
-    conn.execute(commands, tuple(values))
+    res = conn.execute(commands, values)
 
-    return conn.fetchall()
+    return res.fetchall()
 
 
 def column(command, *values):
-    conn.execute(command, *values)
+    res = conn.execute(command, *values)
 
-    return [item[0] for item in conn.fetchall()]
+    return [item[0] for item in res.fetchall()]
 
 
 def execute(command, *values):

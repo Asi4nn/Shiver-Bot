@@ -28,10 +28,10 @@ class Info(Cog):
         target = target or ctx.author
 
         embed = Embed(
-            title = f"{target.name}#{target.discriminator}",
-            description = target.mention,
-            colour = target.colour,
-            timestamp = datetime.now().astimezone(est)
+            title=f"{target.name}#{target.discriminator}",
+            description=target.mention,
+            colour=target.colour,
+            timestamp=datetime.now().astimezone(est)
         )
         embed.set_thumbnail(url=target.avatar_url)
 
@@ -39,7 +39,7 @@ class Info(Cog):
         joined = target.joined_at
         created = target.created_at
         joined = utc.localize(joined)
-        created= utc.localize(created)
+        created = utc.localize(created)
 
         fields = [
             ("ID", target.id, False),

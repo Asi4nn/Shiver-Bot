@@ -15,7 +15,7 @@ from ..db import db_postgresql
 
 from os import listdir
 
-PREFIX = '/'
+PREFIX = '$'
 OWNER_IDS = [164144088818515968]
 COGS = []
 IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
@@ -33,10 +33,9 @@ class Bot(BaseBot):
     def __init__(self):
         self.ready = False
         self.prefix = PREFIX
-        # self.guild = None
         self.scheduler = AsyncIOScheduler()
 
-        db_postgresql.autosave(self.scheduler)
+        # db_postgresql.autosave(self.scheduler)
         super().__init__(command_prefix=get_prefix, owner_ids=OWNER_IDS)
 
     def run(self):
