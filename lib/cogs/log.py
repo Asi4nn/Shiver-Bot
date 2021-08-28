@@ -16,7 +16,7 @@ class Log(Cog):
         if not after.author.bot:
             time = after.edited_at.strftime("%d/%m/%Y [%H:%M:%S]")
             db.execute(
-                "INSERT INTO messages (MessageID, guild, channel, author, time, message, status) VALUES (%s, %s, %s, %s, %s, %s, %s) "
+                "INSERT INTO messages (MessageID, guild, channel, author, time, message, status) VALUES (?, ?, ?, ?, ?, ?, ?) "
                 "ON CONFLICT (MessageID) "
                 "DO UPDATE SET "
                 "   time = %s, "

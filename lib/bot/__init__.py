@@ -14,6 +14,7 @@ from ..helpers.getTime import get_current_time
 from ..db import db_postgresql
 
 from os import listdir
+from os.path import dirname, realpath, sep
 
 PREFIX = '$'
 OWNER_IDS = [164144088818515968]
@@ -40,7 +41,8 @@ class Bot(BaseBot):
         super().__init__(command_prefix=get_prefix, owner_ids=OWNER_IDS)
 
     def run(self):
-        with open('lib/bot/TOKEN.txt', 'r', encoding="utf-8") as token:
+        print(dirname(realpath(__file__)))
+        with open(dirname(realpath(__file__)) + sep + "TOKEN.txt", 'r', encoding="utf-8") as token:
             self.token = token.read()
 
         self.load_cogs()

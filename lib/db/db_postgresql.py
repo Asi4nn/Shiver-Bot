@@ -17,25 +17,25 @@ conn: MockConnection = engine.connect().execution_options(autocommit=True)
 
 def build():
     conn.execute('''CREATE TABLE IF NOT EXISTS birthdays (
-                        UserID bigint PRIMARY KEY,
-                        GuildID bigint,
-                        date text
-                    );
+                            UserID bigint PRIMARY KEY,
+                            GuildID bigint,
+                            date text
+                        );
 
-                    CREATE TABLE IF NOT EXISTS channels (
-                        GuildID bigint PRIMARY KEY,
-                        channel bigint
-                    );
+                        CREATE TABLE IF NOT EXISTS channels (
+                            GuildID bigint PRIMARY KEY,
+                            channel bigint
+                        );
 
-                    CREATE TABLE IF NOT EXISTS messages (
-                        MessageID bigint PRIMARY KEY,
-                        guild text,
-                        channel text,
-                        author text,
-                        time text,
-                        message text,
-                        status text
-                    );''')
+                        CREATE TABLE IF NOT EXISTS messages (
+                            MessageID bigint PRIMARY KEY,
+                            guild text,
+                            channel text,
+                            author text,
+                            time text,
+                            message text,
+                            status text
+                        );''')
     time = datetime.now().strftime("[%H:%M:%S]")
     print(time, "Built database")
 
