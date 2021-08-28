@@ -22,10 +22,27 @@ I host the Postgres database on Heroku with the bot.
 ```build.sql``` and ```database.db``` were used for an SQLite database that is no longer in use.
 
 #### Some useful scripts:
+- ```git pull heroku main```
+
+Pulls the remote repository from Heroku
+
+- ```git push heroku main```
+
+Pushing the current repo to Heroku to deploy
+
 - ```PGUSER={user} PGPASSWORD={password} heroku pg:pull DATABASE_URL {local db name} --app shiver-bot```
 
 Copies the deployed database to a local Postgres one of your choice
 
 ### Copying the repo
 
-Make sure you make a file ```TOKEN.txt``` in  ```lib/bot``` with your own Discord bot token if you plan on hosting it yourself
+Make sure you make a file ```TOKEN.txt``` in  ```lib/bot``` 
+with your own Discord bot token if you plan on hosting it yourself
+
+### Running the bot
+
+Make sure to have all dependencies in ```requirements.txt``` 
+downloaded with at least the python version listed in ```runtime.txt```
+
+Run the ```launcher.py``` file in the venv to run the bot, a ```run.bat``` file is 
+also provided for convenience.
