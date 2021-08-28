@@ -11,6 +11,7 @@ except KeyError:
     DATABASE_URL = "postgresql+psycopg2://postgres:Leowang14@127.0.0.1:5432/postgres"
 
 engine = create_engine(DATABASE_URL, echo=False)
+<<<<<<< HEAD
 
 conn: MockConnection = engine.connect().execution_options(autocommit=True)
 
@@ -38,8 +39,50 @@ def build():
                         );''')
     time = datetime.now().strftime("[%H:%M:%S]")
     print(time, "Built database")
+=======
+>>>>>>> 0ef20b1d2ec9fdcb1bc623bee6b293e2f120b156
+
+conn: MockConnection = engine.connect().execution_options(autocommit=True)
+
+<<<<<<< HEAD
+def connect():
+    global conn
+
+    # create the db for the first time
+=======
+
+def build():
+>>>>>>> 0ef20b1d2ec9fdcb1bc623bee6b293e2f120b156
+    conn.execute('''CREATE TABLE IF NOT EXISTS birthdays (
+                        UserID bigint PRIMARY KEY,
+                        GuildID bigint,
+                        date text
+                    );
+
+                    CREATE TABLE IF NOT EXISTS channels (
+                        GuildID bigint PRIMARY KEY,
+                        channel bigint
+                    );
+
+                    CREATE TABLE IF NOT EXISTS messages (
+                        MessageID bigint PRIMARY KEY,
+                        guild text,
+                        channel text,
+                        author text,
+                        time text,
+                        message text,
+                        status text
+                    );''')
+<<<<<<< HEAD
+
+=======
+>>>>>>> 0ef20b1d2ec9fdcb1bc623bee6b293e2f120b156
+    time = datetime.now().strftime("[%H:%M:%S]")
+    print(time, "Built database")
 
 
+<<<<<<< HEAD
+=======
 def connect():
     global conn
 
@@ -69,6 +112,7 @@ def connect():
     print(time, "Connected to Database")
 
 
+>>>>>>> 0ef20b1d2ec9fdcb1bc623bee6b293e2f120b156
 def close():
     time = datetime.now().strftime("[%H:%M:%S]")
     print(time, "Closing connection to database")
