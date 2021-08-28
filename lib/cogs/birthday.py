@@ -28,8 +28,8 @@ class Birthday(Cog):
         else:
             await ctx.send("Invalid format! (Type /help for syntax)")
 
-    @command(name="birthday_check", aliases=["bdaycheck"],
-             brief="Checks birthdate for the given user in the form DD/MM/YYYY")
+    @command(name="birthday_check", aliases=["bdaycheck", "bday_check"],
+             brief="Checks birth date for the given user")
     async def birthday_check(self, ctx, mention):
         mention = mention.strip()
         record = db_postgresql.record("SELECT * FROM birthdays WHERE UserID = %s AND GuildID = %s",

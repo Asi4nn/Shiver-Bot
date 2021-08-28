@@ -1,3 +1,7 @@
+#####################################################
+# Deprecated in favour of PostgreSQL using Heroku
+#####################################################
+
 from os.path import isfile, dirname, abspath, join
 from os import chdir
 from sqlite3 import connect

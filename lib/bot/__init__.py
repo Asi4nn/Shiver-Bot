@@ -34,6 +34,7 @@ class Bot(BaseBot):
         self.ready = False
         self.prefix = PREFIX
         self.scheduler = AsyncIOScheduler()
+        self.token = None
 
         # db_postgresql.autosave(self.scheduler)
         super().__init__(command_prefix=get_prefix, owner_ids=OWNER_IDS)
@@ -70,7 +71,6 @@ class Bot(BaseBot):
                 channel = channels[guildIDs.index(user_guilds[i])]
                 age = datetime.today().year - int(bdays[i][6:])
                 await self.announce_birthday(user_guilds[i], int(channel), f'<@!{users[i]}>', age)
-
 
     async def on_connect(self):
         print(get_current_time(), "Logged in as {0.user}".format(self))

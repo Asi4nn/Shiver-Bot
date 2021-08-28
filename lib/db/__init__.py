@@ -1,3 +1,3 @@
-from . import db_sqlite
+from . import db_postgresql as db
 
-db_sqlite.build()
+db.build()

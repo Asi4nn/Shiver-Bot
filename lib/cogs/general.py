@@ -7,12 +7,12 @@ from discord.ext.commands import command
 from discord.ext.commands import has_permissions
 
 from lib.db import db_postgresql
-import os
 
 # CONTRIBUTORS: add your discord tag and github link in this dictionary
 CONTRIBUTORS = {"Asi4n#5622": "github.com/Asi4nn"}
 
-class tests(Cog):
+
+class General(Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -63,11 +63,12 @@ class tests(Cog):
     @has_permissions(manage_guild=True)
     async def channel(self, ctx):
         try:
-            db_postgresql.execute("INSERT OR REPLACE INTO channels(GuildID, channel) VALUES (?, ?)", ctx.guild.id, ctx.channel.id)
+            db_postgresql.execute("INSERT OR REPLACE INTO channels(GuildID, channel) VALUES (?, ?)", ctx.guild.id,
+                                  ctx.channel.id)
             await ctx.send(f"Set the announcement channel to {ctx.channel.name}")
         except:
             await ctx.send("Failed to set channel")
 
 
 def setup(bot):
-    bot.add_cog(tests(bot))
+    bot.add_cog(General(bot))
