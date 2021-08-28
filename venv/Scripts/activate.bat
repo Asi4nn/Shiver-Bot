@@ -9,6 +9,7 @@ if defined _OLD_CODEPAGE (
 )
 
 set VIRTUAL_ENV=D:\Documents\Programming\ShiverBot\Shiver-Bot\venv
+set DATABASE_URL=postgres://$(whoami)
 
 if not defined PROMPT set PROMPT=$P$G
 
