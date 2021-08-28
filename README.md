@@ -28,7 +28,8 @@ Pulls the remote repository from Heroku to current branch
 
 - ```git push heroku {branch}:main```
 
-Push ```branch``` to deploy to Heroku
+Push ```branch``` to deploy to Heroku, currently using a private ```deployment ```
+branch to store the ```TOKEN.txt```
 
 - ```PGUSER={user} PGPASSWORD={password} heroku pg:pull DATABASE_URL {local db name} --app shiver-bot```
 
