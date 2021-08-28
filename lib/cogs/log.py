@@ -43,7 +43,7 @@ class Log(Cog):
         if not message.author.bot:
             time = message.created_at.strftime("%d/%m/%Y [%H:%M:%S]")
             db.execute(
-                "INSERT INTO messages (MessageID, guild, channel, author, time, message, status) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO messages (MessageID, guild, channel, author, time, message, status) VALUES (%s, %s, %s, %s, %s, %s, %s)",
                 message.id, message.guild.name, message.channel.name, message.author.name, time, message.content, "ORIGINAL")
 
 
