@@ -1,40 +1,62 @@
-import psycopg2
 from os import environ
 from datetime import datetime
-from apscheduler.triggers.cron import CronTrigger
+from sqlalchemy import create_engine
+from sqlalchemy.engine.mock import MockConnection
 
 try:
     DATABASE_URL = environ['DATABASE_URL']
+    split = DATABASE_URL.split("//")
+    DATABASE_URL = "postgresql+psycopg2://" + split[1]
 except KeyError:
-    DATABASE_URL = "postgres"
+    DATABASE_URL = "postgresql+psycopg2://postgres:Leowang14@127.0.0.1:5432/postgres"
 
-cxn = None
-cur = None
+engine = create_engine(DATABASE_URL, echo=False)
+
+conn: MockConnection = engine.connect().execution_options(autocommit=True)
 
 
-async def connect():
-    global cxn
-    global cur
-    if DATABASE_URL == "postgres":
-        cxn = psycopg2.connect(database=DATABASE_URL, user="postgres", password="Leowang14", host="127.0.0.1", port="5432")
-    else:
-        cxn = psycopg2.connect(database=DATABASE_URL, sslmode='require')
-    cur = cxn.cursor()
+def build():
+    conn.execute('''CREATE TABLE IF NOT EXISTS birthdays (
+                            UserID bigint PRIMARY KEY,
+                            GuildID bigint,
+                            date text
+                        );
+
+                        CREATE TABLE IF NOT EXISTS channels (
+                            GuildID bigint PRIMARY KEY,
+                            channel bigint
+                        );
+
+                        CREATE TABLE IF NOT EXISTS messages (
+                            MessageID bigint PRIMARY KEY,
+                            guild text,
+                            channel text,
+                            author text,
+                            time text,
+                            message text,
+                            status text
+                        );''')
+    time = datetime.now().strftime("[%H:%M:%S]")
+    print(time, "Built database")
+
+
+def connect():
+    global conn
 
     # create the db for the first time
-    cur.execute('''CREATE TABLE IF NOT EXISTS birthdays (
-                        UserID integer PRIMARY KEY,
-                        GuildID integer,
+    conn.execute('''CREATE TABLE IF NOT EXISTS birthdays (
+                        UserID bigint PRIMARY KEY,
+                        GuildID bigint,
                         date text
                     );
 
                     CREATE TABLE IF NOT EXISTS channels (
-                        GuildID integer PRIMARY KEY,
-                        channel integer
+                        GuildID bigint PRIMARY KEY,
+                        channel bigint
                     );
 
                     CREATE TABLE IF NOT EXISTS messages (
-                        MessageID integer PRIMARY KEY,
+                        MessageID bigint PRIMARY KEY,
                         guild text,
                         channel text,
                         author text,
@@ -42,55 +64,45 @@ async def connect():
                         message text,
                         status text
                     );''')
-    cxn.commit()
 
     time = datetime.now().strftime("[%H:%M:%S]")
     print(time, "Connected to Database")
 
 
-def commit():
-    time = datetime.now().strftime("[%H:%M:%S]")
-    print(time, "Saving to Database")
-    cxn.commit()
-
-
-def autosave(sch):
-    sch.add_job(commit, CronTrigger(second=0))
-
-
 def close():
-    cxn.close()
+    time = datetime.now().strftime("[%H:%M:%S]")
+    print(time, "Closing connection to database")
 
 
 def field(command, *values):
-    cur.execute(command, tuple(values))
+    res = conn.execute(command, tuple(values))
 
-    fetch = cur.fetchone()
+    fetch = res.fetchone()
     if fetch is not None:
         return fetch[0]
 
 
 def record(command, *values):
-    cur.execute(command, tuple(values))
+    res = conn.execute(command, values)
 
-    return cur.fetchone()
+    return res.fetchone()
 
 
 def records(commands, *values):
-    cur.execute(commands, tuple(values))
+    res = conn.execute(commands, values)
 
-    return cur.fetchall()
+    return res.fetchall()
 
 
 def column(command, *values):
-    cur.execute(command, *values)
+    res = conn.execute(command, *values)
 
-    return [item[0] for item in cur.fetchall()]
+    return [item[0] for item in res.fetchall()]
 
 
 def execute(command, *values):
-    cur.execute(command, tuple(values))
+    conn.execute(command, tuple(values))
 
 
 def multiexec(command, value_set):
-    cur.executemany(command, value_set)
+    conn.executemany(command, value_set)

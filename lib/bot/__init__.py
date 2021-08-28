@@ -15,7 +15,7 @@ from ..db import db_postgresql
 
 from os import listdir
 
-PREFIX = '/'
+PREFIX = '$'
 OWNER_IDS = [164144088818515968]
 COGS = []
 IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
@@ -33,10 +33,10 @@ class Bot(BaseBot):
     def __init__(self):
         self.ready = False
         self.prefix = PREFIX
-        # self.guild = None
         self.scheduler = AsyncIOScheduler()
+        self.token = None
 
-        db_postgresql.autosave(self.scheduler)
+        # db_postgresql.autosave(self.scheduler)
         super().__init__(command_prefix=get_prefix, owner_ids=OWNER_IDS)
 
     def run(self):
@@ -71,7 +71,6 @@ class Bot(BaseBot):
                 channel = channels[guildIDs.index(user_guilds[i])]
                 age = datetime.today().year - int(bdays[i][6:])
                 await self.announce_birthday(user_guilds[i], int(channel), f'<@!{users[i]}>', age)
-
 
     async def on_connect(self):
         print(get_current_time(), "Logged in as {0.user}".format(self))

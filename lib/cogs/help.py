@@ -8,7 +8,7 @@ from discord.ext.menus import MenuPages, ListPageSource
 
 
 def syntax(command):
-    aliases = ", ".join([str(command) ,*command.aliases])
+    aliases = ", ".join([str(command), *command.aliases])
     params = []
 
     for key, value in command.params.items():
@@ -30,13 +30,13 @@ class HelpMenu(ListPageSource):
         len_data = len(self.entries)
 
         embed = Embed(
-            title = "Help Menu (/help)",
-            description = "Descriptions of all commands in Shiver Bot!",
-            colour = self.ctx.author.colour
+            title="Help Menu (/help)",
+            description="Descriptions of all commands in Shiver Bot!",
+            colour=self.ctx.author.colour
         )
 
         embed.set_thumbnail(url=self.ctx.guild.me.avatar_url)
-        embed.set_footer(text=f"{offset:,} - {min(len_data, offset+self.per_page-1):,} of {len_data:,} commands.")
+        embed.set_footer(text=f"{offset:,} - {min(len_data, offset + self.per_page - 1):,} of {len_data:,} commands.")
 
         for name, value in fields:
             embed.add_field(name=name, value=value, inline=False)
@@ -63,9 +63,9 @@ class Help(Cog):
 
     async def cmd_help(self, ctx, command):
         embed = Embed(
-            title = f"Info about {command} command",
-            description = syntax(command),
-            colour = ctx.author.colour
+            title=f"Info about {command} command",
+            description=syntax(command),
+            colour=ctx.author.colour
         )
         embed.add_field(name="Command description", value=command.brief)
         await ctx.send(embed=embed)
@@ -81,7 +81,6 @@ class Help(Cog):
                 await self.cmd_help(ctx, command)
             else:
                 await ctx.send("That command doesn't exist")
-
 
 
 def setup(bot):
