@@ -42,7 +42,7 @@ class Bot(BaseBot):
 
     def run(self):
         print(dirname(realpath(__file__)))
-        with open(dirname(realpath(__file__)) + sep + "TOKEN.txt", 'r', encoding="utf-8") as token:
+        with open("TOKEN.txt", 'r', encoding="utf-8") as token:
             self.token = token.read()
 
         self.load_cogs()
