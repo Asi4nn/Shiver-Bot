@@ -1,29 +1,43 @@
-from discord.ext.commands import Cog
+from discord.ext.commands import Cog, Context
 from discord.ext.commands import command
 from discord.ext.commands import has_permissions
 
 from re import fullmatch
 from datetime import datetime
 
-from lib.db import db_postgresql
+from lib.db import db_postgresql as db
 
 
 class Birthday(Cog):
     def __init__(self, bot):
         self.bot = bot
 
-    @command(name="birthday", aliases=["bday"], brief="Adds birthday notification for the given user, date must be in "
-                                                      "the form DD/MM/YYYY")
+    @command(name="birthday", aliases=["bday"], brief="Saves your birthday info and adds notification on that date, "
+                                                      "date must be in the form DD/MM/YYYY")
+    async def birthday(self, ctx: Context, date):
+        date = date.strip()
+        if self.validate_birthday(ctx.author.mention, date):
+            db.execute("INSERT INTO birthdays(UserID, GuildID, date) "
+                       "VALUES (%s, %s, %s) "
+                       "ON CONFLICT(UserID) "
+                       "DO UPDATE SET date = %s",
+                       ctx.author.id, ctx.guild.id, date, date)
+            await ctx.send(f"Added birthdate {date} for {ctx.author.mention}")
+        else:
+            await ctx.send("Invalid format! (Type /help for syntax)")
+
+    @command(name="set_birthday", aliases=["set_bday"], brief="Saves birthday info for the given user, "
+                                                              "date must be in the form DD/MM/YYYY")
     @has_permissions(manage_roles=True)
-    async def birthday(self, ctx, mention, date):
+    async def set_birthday(self, ctx, mention, date):
         mention = mention.strip()
         date = date.strip()
         if self.validate_birthday(mention, date):
-            db_postgresql.execute("INSERT INTO birthdays(UserID, GuildID, date) "
-                                  "VALUES (%s, %s, %s) "
-                                  "ON CONFLICT(UserID) "
-                                  "DO UPDATE SET date = %s",
-                                  int(mention[3:len(mention) - 1]), ctx.guild.id, date, date)
+            db.execute("INSERT INTO birthdays(UserID, GuildID, date) "
+                       "VALUES (%s, %s, %s) "
+                       "ON CONFLICT(UserID) "
+                       "DO UPDATE SET date = %s",
+                       int(mention[3:len(mention) - 1]), ctx.guild.id, date, date)
             await ctx.send(f"Added birthdate {date} for {mention}")
         else:
             await ctx.send("Invalid format! (Type /help for syntax)")
@@ -32,8 +46,8 @@ class Birthday(Cog):
              brief="Checks birth date for the given user")
     async def birthday_check(self, ctx, mention):
         mention = mention.strip()
-        record = db_postgresql.record("SELECT * FROM birthdays WHERE UserID = %s AND GuildID = %s",
-                                      int(mention[3:len(mention) - 1]), ctx.guild.id)
+        record = db.record("SELECT * FROM birthdays WHERE UserID = %s AND GuildID = %s",
+                           int(mention[3:len(mention) - 1]), ctx.guild.id)
         if record is None:
             await ctx.send("This this user has no recorded birth date")
         else:
