@@ -21,14 +21,14 @@ I host the Postgres database on Heroku with the bot.
 
 ```build.sql``` and ```database.db``` were used for an SQLite database that is no longer in use.
 
-#### Some useful scripts:
+#### Some useful commands:
 - ```git pull heroku main```
 
-Pulls the remote repository from Heroku
+Pulls the remote repository from Heroku to current branch
 
-- ```git push heroku main```
+- ```git push heroku {branch}:main```
 
-Pushing the current repo to Heroku to deploy
+Push ```branch``` to deploy to Heroku
 
 - ```PGUSER={user} PGPASSWORD={password} heroku pg:pull DATABASE_URL {local db name} --app shiver-bot```
 
