@@ -13,7 +13,7 @@ class Log(Cog):
 
     @Cog.listener()
     async def on_message_edit(self, before: Message, after: Message):
-        if not after.author.bot:
+        if not after.author.bot and before.content != after.content:
             time = after.edited_at.strftime("%d/%m/%Y [%H:%M:%S]")
             db.execute(
                 "INSERT INTO messages (MessageID, guild, channel, author, time, message, status) VALUES (%s, %s, %s, %s, %s, %s, %s) "
