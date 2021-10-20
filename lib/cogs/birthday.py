@@ -7,6 +7,8 @@ from datetime import datetime
 
 from lib.db import db_postgresql as db
 
+from bot import PREFIX
+
 
 class Birthday(Cog):
     def __init__(self, bot):
@@ -24,7 +26,7 @@ class Birthday(Cog):
                        ctx.author.id, ctx.guild.id, date, date)
             await ctx.send(f"Added birthdate {date} for {ctx.author.mention}")
         else:
-            await ctx.send("Invalid format! (Type /help for syntax)")
+            await ctx.send(f"Invalid format! (Type {PREFIX}help for syntax)")
 
     @command(name="set_birthday", aliases=["set_bday"], brief="Saves birthday info for the given user, "
                                                               "date must be in the form DD/MM/YYYY")
@@ -40,7 +42,7 @@ class Birthday(Cog):
                        int(mention[3:len(mention) - 1]), ctx.guild.id, date, date)
             await ctx.send(f"Added birthdate {date} for {mention}")
         else:
-            await ctx.send("Invalid format! (Type /help for syntax)")
+            await ctx.send(f"Invalid format! (Type {PREFIX}help for syntax)")
 
     @command(name="birthday_check", aliases=["bdaycheck", "bday_check"],
              brief="Checks birth date for the given user")
