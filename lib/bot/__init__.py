@@ -95,12 +95,12 @@ class Bot(BaseBot):
             await ctx.send(f"Bad argument, type {PREFIX}help for a list of commands")
         elif isinstance(exc, MissingRequiredArgument):
             await ctx.send("Argument(s) are missing from command")
-        elif isinstance(exec, CommandError):
-            await ctx.sned("Error processing command")
-        elif isinstance(exc.original, HTTPException):
+        elif isinstance(exc, HTTPException):
             await ctx.send("Unable to send message (likely too long)")
-        elif isinstance(exc.original, Forbidden):
+        elif isinstance(exc, Forbidden):
             await ctx.send("I don't have permission to do that")
+        elif isinstance(exc, CommandError):
+            await ctx.send("Error processing command")
         else:
             raise exc
 
