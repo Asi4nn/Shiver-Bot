@@ -1,5 +1,5 @@
 import asyncio
-from typing import Optional
+from typing import Optional, Dict
 
 import discord
 import youtube_dl
@@ -12,16 +12,6 @@ FFMPEG_OPTIONS = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
     'options': '-vn'
 }
-YDL_OPTIONS = {
-    'format': 'bestaudio/best',
-    'default_search': "ytsearch",
-    'postprocessors': [{
-        'key': "FFmpegExtractAudio",
-        'preferredcodec': 'mp3',
-        'preferredquality': '192'
-    }],
-    "extract_flat": "in_playlist"
-}
 
 '''Many ideas taken from: https://github.com/joek13/py-music-bot/blob/master/musicbot/cogs/music.py'''
 
@@ -32,7 +22,7 @@ async def audio_playing(ctx):
     if client and client.channel and client.source:
         return True
     else:
-        await ctx.send("Not currently playing any audio.")
+        await ctx.send("Not currently playing any audio")
 
 
 async def in_voice_channel(ctx):
@@ -42,15 +32,27 @@ async def in_voice_channel(ctx):
     if voice and bot_voice and voice.channel and bot_voice.channel and voice.channel == bot_voice.channel:
         return True
     else:
-        await ctx.send("You need to be in the channel to do that.")
+        await ctx.send("You need to be in the channel to do that")
+
+
+class GuildState:
+    """Helper class managing per-guild state."""
+
+    def __init__(self):
+        self.volume = 1.0
+        self.playlist = []
+        self.now_playing = None
+
+    def is_requester(self, user):
+        return self.now_playing.requested_by == user
 
 
 class Music(Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.states = {}
+        self.states: Dict[GuildState] = {}
 
-    def get_state(self, guild):
+    def get_state(self, guild) -> GuildState:
         """Gets the state for `guild`, creating it if it does not exist."""
         if guild.id in self.states:
             return self.states[guild.id]
@@ -68,7 +70,7 @@ class Music(Cog):
     async def nowplaying(self, ctx):
         """Displays information about the current song."""
         state = self.get_state(ctx.guild)
-        message = await ctx.send("", embed=state.now_playing.get_embed())
+        await ctx.send("", embed=state.now_playing.get_embed())
 
     @command(name="queue", aliases=["q", "playlist"], brief="Displays the song queue")
     @guild_only()
@@ -100,6 +102,18 @@ class Music(Cog):
         client = ctx.guild.voice_client
         client.stop()
 
+    @command(name="remove", aliases=["r"], brief="Remove the song at the given")
+    @guild_only()
+    @check(audio_playing)
+    @check(in_voice_channel)
+    async def remove(self, ctx: Context, index: str):
+        playlist = self.get_state(ctx.guild).playlist
+        if 1 <= int(index) <= len(playlist):
+            song = playlist.pop(int(index) - 1)
+            await ctx.send(f"Removing {index}. **{song.title}** request by **{song.requested_by}**")
+        else:
+            await ctx.send("Invalid index")
+
     @command(name="join", brief="Makes the bot join your voice channel if applicable")
     @guild_only()
     async def join(self, ctx: Context):
@@ -112,7 +126,7 @@ class Music(Cog):
         else:
             await ctx.voice_client.move_to(channel)
 
-    @command(name="leave", aliases=["disconnect", "fuckoff", "dc"],
+    @command(name="leave", aliases=["disconnect", "dc", "fuckoff"],
              brief="Makes the bot join your voice channel if applicable")
     @guild_only()
     async def leave(self, ctx: Context):
@@ -139,8 +153,7 @@ class Music(Cog):
                 video = Video(url, ctx.author)
             except youtube_dl.DownloadError as e:
                 print(f"Error downloading video: {e}")
-                await ctx.send(
-                    "There was an error downloading your video, sorry")
+                await ctx.send("There was an error downloading your video")
                 return
             state.playlist.append(video)
             await ctx.send("Added to queue.", embed=video.get_embed())
@@ -150,8 +163,7 @@ class Music(Cog):
                 try:
                     video = Video(url, ctx.author)
                 except youtube_dl.DownloadError as e:
-                    await ctx.send(
-                        "There was an error downloading your video, sorry")
+                    await ctx.send("There was an error downloading your video")
                     return
                 client = await channel.connect()
                 self._play_song(client, state, video)
@@ -169,10 +181,16 @@ class Music(Cog):
                 next_song = state.playlist.pop(0)
                 self._play_song(client, state, next_song)
             else:
-                asyncio.run_coroutine_threadsafe(client.disconnect(),
-                                                 self.bot.loop)
+                asyncio.run_coroutine_threadsafe(client.disconnect(), self.bot.loop)
 
         client.play(source, after=after_playing)
+
+    @command(name="clearqueue", aliases=["cq"], brief="Clears the song queue")
+    @guild_only()
+    @check(audio_playing)
+    async def clearqueue(self, ctx: Context):
+        state = self.get_state(ctx.guild)
+        state.playlist = []
 
     @command(name="pause", brief="Pauses the music if applicable")
     @guild_only()
@@ -185,18 +203,6 @@ class Music(Cog):
             await ctx.send("Paused")
         else:
             await ctx.send("Music bot is currently paused!")
-
-
-class GuildState:
-    """Helper class managing per-guild state."""
-
-    def __init__(self):
-        self.volume = 1.0
-        self.playlist = []
-        self.now_playing = None
-
-    def is_requester(self, user):
-        return self.now_playing.requested_by == user
 
 
 def setup(bot):

@@ -5,7 +5,7 @@ from datetime import datetime
 
 from discord.ext.commands import Bot as BaseBot
 from discord.ext.commands import when_mentioned_or
-from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument, CommandError)
+from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument, MissingPermissions)
 from discord.errors import HTTPException, Forbidden
 from discord.utils import get
 
@@ -99,13 +99,16 @@ class Bot(BaseBot):
             await ctx.send("Unable to send message (likely too long)")
         elif isinstance(exc, Forbidden):
             await ctx.send("I don't have permission to do that")
+        elif isinstance(exc, MissingPermissions):
+            await ctx.send("You don't have permission to do that")
         else:
+            await ctx.send("An error occurred...")
             raise exc
 
     async def on_ready(self):
         if not self.ready:
             # Daily birthday checker
-            self.scheduler.add_job(self.birthday_trigger, CronTrigger(second="0", minute="0", hour="0"))
+            self.scheduler.add_job(self.birthday_trigger, CronTrigger(second="0", minute="0", hour="12"))
             self.scheduler.start()
 
             self.ready = True

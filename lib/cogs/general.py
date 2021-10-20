@@ -66,8 +66,11 @@ class General(Cog):
     @has_permissions(manage_guild=True)
     async def channel(self, ctx):
         try:
-            db_postgresql.execute("INSERT OR REPLACE INTO channels(GuildID, channel) VALUES (?, ?)", ctx.guild.id,
-                                  ctx.channel.id)
+            db_postgresql.execute("INSERT INTO channels(GuildID, channel) "
+                                  "VALUES (%s, %s) "
+                                  "ON CONFLICT(GuildID) "
+                                  "DO UPDATE SET channel = %s",
+                                  ctx.guild.id, ctx.channel.id, ctx.channel.id)
             await ctx.send(f"Set the announcement channel to {ctx.channel.name}")
         except:
             await ctx.send("Failed to set channel")
