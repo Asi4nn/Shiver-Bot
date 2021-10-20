@@ -10,7 +10,7 @@ Default prefex is ```$```
 
 You can get info about all commands with ```$help```
 
-## Modifying
+## Contributing
 
 You can add your information in the ```lib/cogs/general.py``` file if you want
 contribution to be shown.
@@ -37,6 +37,10 @@ NOTE: Token might be changed to an environment var to ease the deployment proces
 - ```PGUSER={user} PGPASSWORD={password} heroku pg:pull DATABASE_URL {local db name} --app shiver-bot```
 
 Copies the deployed database to a local Postgres one of your choice
+
+- ```heroku buildpacks:add https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git```
+
+Installs FFmpeg on your Heroku instance
 
 ### Copying the repo
 
