@@ -2,9 +2,9 @@ import asyncio
 from typing import Optional
 
 import discord
-from discord import VoiceClient
-from discord.ext.commands import Cog, command, Context, CommandError, guild_only, check
 import youtube_dl
+from discord.ext.commands import Cog, command, Context, guild_only, check
+
 from ..helpers.video import Video
 
 QUEUE = []
@@ -162,7 +162,7 @@ class Music(Cog):
     def _play_song(self, client, state, song):
         state.now_playing = song
         source = discord.PCMVolumeTransformer(
-            discord.FFmpegPCMAudio(song.stream_url, **FFMPEG_OPTIONS), volume=state.volume)
+            discord.FFmpegOpusAudio(song.stream_url, **FFMPEG_OPTIONS), volume=state.volume)
 
         def after_playing(err):
             if len(state.playlist) > 0:
