@@ -16,6 +16,8 @@ from lib.db import db_postgresql as db
 from os import listdir
 from os.path import sep
 
+import re
+
 PREFIX = '$'
 OWNER_IDS = [164144088818515968]
 COGS = []
@@ -86,9 +88,12 @@ class Bot(BaseBot):
 
     async def on_command_error(self, ctx, exc):
         if isinstance(exc, CommandNotFound):
-            await ctx.send("Command not found, type /help for a list of commands")
+            # Checks if command looks like currency (matches numbers and periods)
+            if not re.match(r'^\$[0-9\.]*$', ctx.message.content.split(' ', 1)[0]):
+                await ctx.send(f"Command not found, type {PREFIX}help for a list of commands")
+                
         elif isinstance(exc, BadArgument):
-            await ctx.send("Bad argument, type /help for a list of commands")
+            await ctx.send(f"Bad argument, type {PREFIX}help for a list of commands")
         elif isinstance(exc, MissingRequiredArgument):
             await ctx.send("Argument(s) are missing from command")
         elif isinstance(exc.original, HTTPException):

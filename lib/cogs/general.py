@@ -9,7 +9,10 @@ from discord.ext.commands import has_permissions
 from lib.db import db_postgresql
 
 # CONTRIBUTORS: add your discord tag and github link in this dictionary
-CONTRIBUTORS = {"Asi4n#5622": "github.com/Asi4nn"}
+CONTRIBUTORS = {
+    "Asi4n#5622": "github.com/Asi4nn",
+    "Epicsteve2": "github.com/Epicsteve2"
+}
 
 
 class General(Cog):

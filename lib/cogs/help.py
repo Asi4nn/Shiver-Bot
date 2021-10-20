@@ -6,6 +6,8 @@ from discord.ext.commands import Cog
 from discord.ext.commands import command
 from discord.ext.menus import MenuPages, ListPageSource
 
+from bot import PREFIX
+
 
 def syntax(command):
     aliases = ", ".join([str(command), *command.aliases])
@@ -30,7 +32,7 @@ class HelpMenu(ListPageSource):
         len_data = len(self.entries)
 
         embed = Embed(
-            title="Help Menu (/help)",
+            title=f"Help Menu ({PREFIX}help)",
             description="Descriptions of all commands in Shiver Bot!",
             colour=self.ctx.author.colour
         )
