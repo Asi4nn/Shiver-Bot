@@ -1,5 +1,8 @@
 import asyncio
+from typing import Optional
+
 import discord
+from discord import VoiceClient
 from discord.ext.commands import Cog, command, Context, CommandError, guild_only, check
 import youtube_dl
 from ..helpers.video import Video
@@ -29,7 +32,7 @@ async def audio_playing(ctx):
     if client and client.channel and client.source:
         return True
     else:
-        raise CommandError("Not currently playing any audio.")
+        await ctx.send("Not currently playing any audio.")
 
 
 async def in_voice_channel(ctx):
@@ -39,7 +42,7 @@ async def in_voice_channel(ctx):
     if voice and bot_voice and voice.channel and bot_voice.channel and voice.channel == bot_voice.channel:
         return True
     else:
-        raise CommandError("You need to be in the channel to do that.")
+        await ctx.send("You need to be in the channel to do that.")
 
 
 class Music(Cog):
@@ -73,12 +76,14 @@ class Music(Cog):
     async def queue(self, ctx):
         """Display the current play queue."""
         state = self.get_state(ctx.guild)
-        await ctx.send(self._queue_text(state.playlist))
+        await ctx.send(self._queue_text(state.playlist, ctx))
 
-    def _queue_text(self, queue):
+    def _queue_text(self, queue, ctx):
         """Returns a block of text describing a given song queue."""
-        if len(queue) > 0:
-            message = [f"{len(queue)} songs in queue:"]
+        np = self.get_state(ctx.guild).now_playing
+        if len(queue) > 0 or np is not None:
+            message = [f"  **NOW PLAYING**: **{np.title}** (requested by **{np.requested_by.name}**)",
+                       f"{len(queue)} songs in queue:"]
             message += [
                 f"  {index + 1}. **{song.title}** (requested by **{song.requested_by.name}**)"
                 for (index, song) in enumerate(queue)
@@ -120,12 +125,13 @@ class Music(Cog):
 
     @command(name="play", aliases=["p"], brief="Plays a song from a YouTube url (pls don't sue me)")
     @guild_only()
-    async def play(self, ctx: Context, *, url: str):
+    async def play(self, ctx: Context, *, url: Optional[str]):
         vc: discord.VoiceClient = ctx.guild.voice_client
         state = self.get_state(ctx.guild)
 
         if vc is not None and vc.is_paused() and not url:   # resumes play if no url param
             vc.resume()
+            await ctx.send("Resumed")
             return
 
         if vc is not None and vc.channel:
@@ -156,7 +162,7 @@ class Music(Cog):
     def _play_song(self, client, state, song):
         state.now_playing = song
         source = discord.PCMVolumeTransformer(
-            discord.FFmpegPCMAudio(song.stream_url, **FFMPEG_OPTIONS, executable="C://FFmpeg//bin//ffmpeg.exe"), volume=state.volume)
+            discord.FFmpegPCMAudio(song.stream_url, **FFMPEG_OPTIONS), volume=state.volume)
 
         def after_playing(err):
             if len(state.playlist) > 0:
@@ -170,9 +176,12 @@ class Music(Cog):
 
     @command(name="pause", brief="Pauses the music if applicable")
     @guild_only()
+    @check(audio_playing)
+    @check(in_voice_channel)
     async def pause(self, ctx: Context):
-        if not ctx.voice_client.is_paused():
-            await ctx.voice_client.pause()
+        vc = ctx.guild.voice_client
+        if not vc.is_paused():
+            vc.pause()
             await ctx.send("Paused")
         else:
             await ctx.send("Music bot is currently paused!")

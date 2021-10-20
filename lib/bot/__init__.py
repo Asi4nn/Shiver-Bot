@@ -5,7 +5,7 @@ from datetime import datetime
 
 from discord.ext.commands import Bot as BaseBot
 from discord.ext.commands import when_mentioned_or
-from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument)
+from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument, CommandError)
 from discord.errors import HTTPException, Forbidden
 from discord.utils import get
 
@@ -95,6 +95,8 @@ class Bot(BaseBot):
             await ctx.send(f"Bad argument, type {PREFIX}help for a list of commands")
         elif isinstance(exc, MissingRequiredArgument):
             await ctx.send("Argument(s) are missing from command")
+        elif isinstance(exec, CommandError):
+            await ctx.sned("Error processing command")
         elif isinstance(exc.original, HTTPException):
             await ctx.send("Unable to send message (likely too long)")
         elif isinstance(exc.original, Forbidden):
