@@ -67,6 +67,34 @@ class Music(Cog):
         state = self.get_state(ctx.guild)
         message = await ctx.send("", embed=state.now_playing.get_embed())
 
+    @command(name="queue", aliases=["q", "playlist"], brief="Displays the song queue")
+    @guild_only()
+    @check(audio_playing)
+    async def queue(self, ctx):
+        """Display the current play queue."""
+        state = self.get_state(ctx.guild)
+        await ctx.send(self._queue_text(state.playlist))
+
+    def _queue_text(self, queue):
+        """Returns a block of text describing a given song queue."""
+        if len(queue) > 0:
+            message = [f"{len(queue)} songs in queue:"]
+            message += [
+                f"  {index + 1}. **{song.title}** (requested by **{song.requested_by.name}**)"
+                for (index, song) in enumerate(queue)
+            ]  # add individual songs
+            return "\n".join(message)
+        else:
+            return "The play queue is empty."
+
+    @command(name="skip", aliases=["s"], brief="Skips the current song")
+    @guild_only()
+    @check(audio_playing)
+    @check(in_voice_channel)
+    async def skip(self, ctx):
+        client = ctx.guild.voice_client
+        client.stop()
+
     @command(name="join", brief="Makes the bot join your voice channel if applicable")
     @guild_only()
     async def join(self, ctx: Context):
@@ -128,7 +156,7 @@ class Music(Cog):
     def _play_song(self, client, state, song):
         state.now_playing = song
         source = discord.PCMVolumeTransformer(
-            discord.FFmpegPCMAudio(song.stream_url, **FFMPEG_OPTIONS), volume=state.volume)
+            discord.FFmpegPCMAudio(song.stream_url, **FFMPEG_OPTIONS, executable="C://FFmpeg//bin//ffmpeg.exe"), volume=state.volume)
 
         def after_playing(err):
             if len(state.playlist) > 0:
