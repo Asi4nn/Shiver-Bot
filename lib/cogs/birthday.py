@@ -7,7 +7,7 @@ from datetime import datetime
 
 from lib.db import db_postgresql as db
 
-from bot import PREFIX
+from ..bot import PREFIX
 
 
 class Birthday(Cog):

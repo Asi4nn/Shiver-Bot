@@ -24,7 +24,7 @@ COGS = []
 IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
 
 for filename in listdir('./lib/cogs'):
-    if filename.endswith('.py'):
+    if filename.endswith('.py') and filename[:-3] != "log":     # disable message logging for saving db storage
         COGS.append(f'lib.cogs.{filename[:-3]}')
 
 

@@ -6,7 +6,7 @@ from discord.ext.commands import Cog
 from discord.ext.commands import command
 from discord.ext.menus import MenuPages, ListPageSource
 
-from bot import PREFIX
+from ..bot import PREFIX
 
 
 def syntax(command):
