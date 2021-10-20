@@ -1,5 +1,12 @@
 # Shiver Bot
-General use discord bot
+General use discord bot for small communities
+
+## Major Features
+
+- Birthday Tracker + Announcer
+- Message logger (currently disabled)
+- Music player
+- A myriad of helpful info commands
 
 ## Usage
 
