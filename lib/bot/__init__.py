@@ -99,8 +99,6 @@ class Bot(BaseBot):
             await ctx.send("Unable to send message (likely too long)")
         elif isinstance(exc, Forbidden):
             await ctx.send("I don't have permission to do that")
-        elif isinstance(exc, CommandError):
-            await ctx.send("Error processing command")
         else:
             raise exc
 
