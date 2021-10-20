@@ -93,7 +93,7 @@ class Bot(BaseBot):
                 await ctx.send(f"Command not found, type {PREFIX}help for a list of commands")
                 
         elif isinstance(exc, BadArgument):
-            await ctx.send("Bad argument, type {PREFIX}help for a list of commands")
+            await ctx.send(f"Bad argument, type {PREFIX}help for a list of commands")
         elif isinstance(exc, MissingRequiredArgument):
             await ctx.send("Argument(s) are missing from command")
         elif isinstance(exc.original, HTTPException):
