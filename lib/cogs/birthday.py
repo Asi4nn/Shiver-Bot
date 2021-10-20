@@ -14,6 +14,10 @@ class Birthday(Cog):
     def __init__(self, bot):
         self.bot = bot
 
+    @Cog.listener()
+    async def on_ready(self):
+        print("Birthday cog ready")
+
     @command(name="birthday", aliases=["bday"], brief="Saves your birthday info and adds notification on that date, "
                                                       "date must be in the form DD/MM/YYYY")
     async def birthday(self, ctx: Context, date):

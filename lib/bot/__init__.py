@@ -1,11 +1,10 @@
+import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
-from asyncio import sleep
 from datetime import datetime
 
 from discord.ext.commands import Bot as BaseBot
 from discord.ext.commands import when_mentioned_or
-from discord.ext.commands import Context
 from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument)
 from discord.errors import HTTPException, Forbidden
 from discord.utils import get
@@ -40,7 +39,7 @@ class Bot(BaseBot):
         self.token = None
 
         # db_postgresql.autosave(self.scheduler)
-        super().__init__(command_prefix=get_prefix, owner_ids=OWNER_IDS)
+        super().__init__(command_prefix=get_prefix, owner_ids=OWNER_IDS, intents=discord.Intents.all())
 
     def run(self):
         with open(sep.join(["lib", "bot", "TOKEN.txt"]), 'r', encoding="utf-8") as token:

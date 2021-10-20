@@ -21,7 +21,7 @@ class Info(Cog):
 
     @Cog.listener()
     async def on_ready(self):
-        pass
+        print("Info cog ready")
 
     @command(name="userinfo", aliases=['ui', 'whois'], brief="Gets info about a user in the server")
     async def user_info(self, ctx: Context, target: Optional[Member]):

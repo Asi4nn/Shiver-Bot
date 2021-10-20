@@ -2,14 +2,18 @@ from discord.ext.commands import Cog
 from lib.db import db_postgresql as db
 from discord import Message
 
+'''
+ONLY ENABLE THIS IF DATABASE STORAGE PERMITS
 
+I used the bot on 2 servers for 1 month and filled 10 000 rows of my database
+'''
 class Log(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @Cog.listener()
     async def on_ready(self):
-        pass
+        print("Log cog ready")
 
     @Cog.listener()
     async def on_message_edit(self, before: Message, after: Message):

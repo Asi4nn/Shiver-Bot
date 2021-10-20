@@ -61,7 +61,7 @@ class Help(Cog):
 
     @Cog.listener()
     async def on_ready(self):
-        pass
+        print("Help cog ready")
 
     async def cmd_help(self, ctx, command):
         embed = Embed(

@@ -21,7 +21,7 @@ class General(Cog):
 
     @Cog.listener()
     async def on_ready(self):
-        pass
+        print("General cog ready")
 
     @command(name="ping", brief="Get the latency between the bot and the server")
     async def ping(self, ctx):
