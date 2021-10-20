@@ -46,8 +46,9 @@ NOTE: Token might be changed to an environment var to ease the deployment proces
 Copies the deployed database to a local Postgres one of your choice
 
 - ```heroku buildpacks:add https://github.com/jonathanong/heroku-buildpack-ffmpeg-latest.git```
+- ```heroku buildpacks:add https://github.com/xrisk/heroku-opus.git```
 
-Installs FFmpeg on your Heroku instance
+Installs FFmpeg and Opus on your Heroku instance
 
 ### Copying the repo
 

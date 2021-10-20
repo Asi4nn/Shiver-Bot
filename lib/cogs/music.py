@@ -162,7 +162,7 @@ class Music(Cog):
     def _play_song(self, client, state, song):
         state.now_playing = song
         source = discord.PCMVolumeTransformer(
-            discord.FFmpegOpusAudio(song.stream_url, **FFMPEG_OPTIONS), volume=state.volume)
+            discord.FFmpegPCMAudio(song.stream_url, **FFMPEG_OPTIONS), volume=state.volume)
 
         def after_playing(err):
             if len(state.playlist) > 0:
