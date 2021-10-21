@@ -1,5 +1,6 @@
 import youtube_dl as ytdl
 import discord
+import time
 
 YTDL_OPTS = {
     "default_search": "ytsearch",
@@ -29,6 +30,7 @@ class Video:
             self.thumbnail = video[
                 "thumbnail"] if "thumbnail" in video else None
             self.requested_by = requested_by
+            self.duration = video["duration"]
 
     def _get_info(self, video_url):
         with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
@@ -48,6 +50,22 @@ class Video:
         embed.set_footer(
             text=f"Requested by {self.requested_by.name}",
             icon_url=self.requested_by.avatar_url)
+
+        duration = time.gmtime(self.duration)
+        if duration.tm_hour == 0:
+            formatted_time = time.strftime("%M Minutes, %S Seconds", duration)
+        else:
+            formatted_time = time.strftime("%H Hours %M Minutes, %S Seconds", duration)
+        embed.add_field(name="Duration", value=formatted_time, inline=True)
         if self.thumbnail:
             embed.set_thumbnail(url=self.thumbnail)
         return embed
+
+    @staticmethod
+    def format_duration(duration: int):
+        """This assumes less than a day duration"""
+        duration = time.gmtime(duration)
+        if duration.tm_hour == 0:
+            return time.strftime("%M Minutes, %S Seconds", duration)
+        else:
+            return time.strftime("%H Hours %M Minutes, %S Seconds", duration)

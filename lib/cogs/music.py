@@ -4,6 +4,7 @@ from typing import Optional, Dict
 import discord
 import youtube_dl
 from discord.ext.commands import Cog, command, Context, guild_only, check
+from ..bot import PREFIX
 
 from ..helpers.video import Video
 
@@ -84,10 +85,10 @@ class Music(Cog):
         """Returns a block of text describing a given song queue."""
         np = self.get_state(ctx.guild).now_playing
         if len(queue) > 0 or np is not None:
-            message = [f"  **NOW PLAYING**: **{np.title}** (requested by **{np.requested_by.name}**)",
+            message = [f"  **NOW PLAYING**: **{np.title}** Duration: **{Video.format_duration(np.duration)}** (requested by **{np.requested_by.name}**)",
                        f"{len(queue)} songs in queue:"]
             message += [
-                f"  {index + 1}. **{song.title}** (requested by **{song.requested_by.name}**)"
+                f"  {index + 1}. **{song.title}** Duration: **{Video.format_duration(song.duration)}** (requested by **{song.requested_by.name}**)"
                 for (index, song) in enumerate(queue)
             ]  # add individual songs
             return "\n".join(message)
@@ -206,7 +207,7 @@ class Music(Cog):
             vc.pause()
             await ctx.send("Paused")
         else:
-            await ctx.send("Music bot is currently paused!")
+            await ctx.send(f"Music bot is currently paused! (Type {PREFIX}play to resume)")
 
 
 def setup(bot):

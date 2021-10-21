@@ -5,7 +5,7 @@ from datetime import datetime
 
 from discord.ext.commands import Bot as BaseBot
 from discord.ext.commands import when_mentioned_or
-from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument, MissingPermissions)
+from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument, MissingPermissions, CheckFailure)
 from discord.errors import HTTPException, Forbidden
 from discord.utils import get
 
@@ -102,7 +102,6 @@ class Bot(BaseBot):
         elif isinstance(exc, MissingPermissions):
             await ctx.send("You don't have permission to do that")
         else:
-            await ctx.send("An error occurred...")
             raise exc
 
     async def on_ready(self):
