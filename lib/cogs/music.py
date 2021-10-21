@@ -107,6 +107,10 @@ class Music(Cog):
     @check(audio_playing)
     @check(in_voice_channel)
     async def remove(self, ctx: Context, index: str):
+        if not index.isdigit():
+            await ctx.send("Invalid index")
+            return
+
         playlist = self.get_state(ctx.guild).playlist
         if 1 <= int(index) <= len(playlist):
             song = playlist.pop(int(index) - 1)
