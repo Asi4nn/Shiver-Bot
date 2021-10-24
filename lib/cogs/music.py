@@ -9,7 +9,7 @@ from ..bot import PREFIX
 from ..helpers.video import Video, QueryManager
 
 QUEUE = []
-LEAVE_DELAY = 30    # in seconds
+LEAVE_DELAY = 60    # in seconds
 FFMPEG_OPTIONS = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
     'options': '-vn'
@@ -53,6 +53,24 @@ class Music(Cog):
     def __init__(self, bot):
         self.bot = bot
         self.states: Dict[GuildState] = {}
+
+    @Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        if not member.bot and after.channel != before.channel:
+            if not [m for m in before.channel.members if not m.bot]:
+                await self.check_and_disconnect(member, before)
+        elif member.id == self.bot.user.id and not [m for m in after.channel.members if not m.bot]:
+            await self.check_and_disconnect(member, after)
+
+    async def check_and_disconnect(self, member, vc):
+        client = member.guild.voice_client
+        state = self.get_state(member.guild)
+        if client and client.channel:
+            await asyncio.sleep(LEAVE_DELAY)
+            if not [m for m in vc.channel.members if not m.bot]:
+                await client.disconnect()
+                state.playlist = []
+                state.now_playing = None
 
     def get_state(self, guild) -> GuildState:
         """Gets the state for `guild`, creating it if it does not exist."""
@@ -140,6 +158,7 @@ class Music(Cog):
         state = self.get_state(ctx.guild)
         if client and client.channel:
             await client.disconnect()
+            await ctx.send(":wave: bye!")
             state.playlist = []
             state.now_playing = None
 
@@ -162,6 +181,7 @@ class Music(Cog):
                 await ctx.send("There was an error downloading your video")
                 return
             state.playlist = new
+            self._play_song(vc.guild.voice_client, state, state.playlist.pop(0))
         else:
             if ctx.author is not None and ctx.author.voice.channel is not None:
                 channel = ctx.author.voice.channel
@@ -185,12 +205,8 @@ class Music(Cog):
             if len(state.playlist) > 0:
                 next_song = state.playlist.pop(0)
                 self._play_song(client, state, next_song)
-            else:
-                asyncio.sleep(LEAVE_DELAY)
-                if client.is_playing():
-                    return
-                else:
-                    asyncio.run_coroutine_threadsafe(client.disconnect(), self.bot.loop)
+            # else:
+            #     asyncio.run_coroutine_threadsafe(client.disconnect(), self.bot.loop)  # changed to dc after all members leave channel
 
         client.play(source, after=after_playing)
 
@@ -200,6 +216,7 @@ class Music(Cog):
     async def clearqueue(self, ctx: Context):
         state = self.get_state(ctx.guild)
         state.playlist = []
+        await ctx.send("Cleared all songs in queue")
 
     @command(name="pause", brief="Pauses the music if applicable")
     @guild_only()
