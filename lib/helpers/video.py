@@ -21,10 +21,13 @@ YTDL_OPTS = {
 class Video:
     """Class containing information about a particular video."""
 
-    def __init__(self, video, requested_by):
+    def __init__(self, url_or_search, requested_by):
         """Plays audio from (or searches for) a URL."""
         with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
-            # video = self._get_info(url_or_search)
+            if type(url_or_search) == str:
+                video = self._get_info(url_or_search)
+            else:
+                video = url_or_search
             video_format = video["formats"][0]
             self.stream_url = video_format["url"]
             self.video_url = video["webpage_url"]
@@ -37,7 +40,6 @@ class Video:
 
     def _get_info(self, video_url):
         with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
-            print(video_url)
             info = ydl.extract_info(video_url, download=False)
             video = None
             if "_type" in info and info["_type"] == "playlist":
