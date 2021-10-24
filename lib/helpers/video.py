@@ -1,16 +1,20 @@
 import youtube_dl as ytdl
 import discord
 import time
+from typing import List
+from discord.ext.commands import Context
 
 YTDL_OPTS = {
     "default_search": "ytsearch",
     "format": "bestaudio/best",
     "quiet": True,
+    "username": "",
+    "password": "",
     "extract_flat": "in_playlist",
-    'postprocessors': [{
-        'key': "FFmpegExtractAudio",
-        'preferredcodec': 'mp3',
-        'preferredquality': '192'
+    "postprocessors": [{
+        "key": "FFmpegExtractAudio",
+        "preferredcodec": "mp3",
+        "preferredquality": "192"
     }],
 }
 
@@ -69,3 +73,21 @@ class Video:
             return time.strftime("%M Minutes, %S Seconds", duration)
         else:
             return time.strftime("%H Hours %M Minutes, %S Seconds", duration)
+
+
+class QueryManager:
+    @staticmethod
+    def query_url(playlist: List[Video], url_or_search, requested_by, ctx: Context) -> List[Video]:
+        new = playlist.copy()
+        with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
+            info = ydl.extract_info(url_or_search, download=False)
+            if "_type" in info and info["_type"] == "playlist":
+                for video in info["entries"]:
+                    video_object = Video(video["url"], requested_by)
+                    new.append(video_object)
+                    await ctx.send("Added to queue.", embed=video_object.get_embed())
+            else:
+                video_object = Video(info, requested_by)
+                new.append(Video(info, requested_by))
+                await ctx.send("Added to queue.", embed=video_object.get_embed())
+            return new

@@ -66,7 +66,7 @@ class Birthday(Cog):
     @staticmethod
     def validate_birthday(mention, date):
         if (fullmatch("<@!\d{18}>", mention) is not None and fullmatch("\d\d/\d\d/\d\d\d\d", date) is not None
-                and int(date[6:]) <= datetime.today().year and mention.user):
+                and int(date[6:]) <= datetime.today().year):
             try:
                 datetime(day=int(date[0:2]), month=int(date[3:5]), year=int(date[6:]))
             except ValueError:

@@ -6,9 +6,10 @@ import youtube_dl
 from discord.ext.commands import Cog, command, Context, guild_only, check
 from ..bot import PREFIX
 
-from ..helpers.video import Video
+from ..helpers.video import Video, QueryManager
 
 QUEUE = []
+LEAVE_DELAY = 30    # in seconds
 FFMPEG_OPTIONS = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
     'options': '-vn'
@@ -148,31 +149,30 @@ class Music(Cog):
         vc: discord.VoiceClient = ctx.guild.voice_client
         state = self.get_state(ctx.guild)
 
-        if vc is not None and vc.is_paused() and not url:   # resumes play if no url param
+        if vc and vc.is_paused() and not url:   # resumes play if no url param
             vc.resume()
             await ctx.send("Resumed")
             return
 
-        if vc is not None and vc.channel:
+        if vc and vc.channel:
             try:
-                video = Video(url, ctx.author)
+                new = QueryManager.query_url(state.playlist, url, ctx.author)
             except youtube_dl.DownloadError as e:
                 print(f"Error downloading video: {e}")
                 await ctx.send("There was an error downloading your video")
                 return
-            state.playlist.append(video)
-            await ctx.send("Added to queue.", embed=video.get_embed())
+            state.playlist = new
         else:
             if ctx.author is not None and ctx.author.voice.channel is not None:
                 channel = ctx.author.voice.channel
                 try:
-                    video = Video(url, ctx.author)
+                    state.playlist = QueryManager.query_url(state.playlist, url, ctx.author)
                 except youtube_dl.DownloadError as e:
                     await ctx.send("There was an error downloading your video")
                     return
                 client = await channel.connect()
+                video = state.playlist.pop(0)
                 self._play_song(client, state, video)
-                await ctx.send("", embed=video.get_embed())
             else:
                 await ctx.send("You need to be in a voice channel to do that")
 
@@ -186,7 +186,11 @@ class Music(Cog):
                 next_song = state.playlist.pop(0)
                 self._play_song(client, state, next_song)
             else:
-                asyncio.run_coroutine_threadsafe(client.disconnect(), self.bot.loop)
+                asyncio.sleep(LEAVE_DELAY)
+                if client.is_playing():
+                    return
+                else:
+                    asyncio.run_coroutine_threadsafe(client.disconnect(), self.bot.loop)
 
         client.play(source, after=after_playing)
 
