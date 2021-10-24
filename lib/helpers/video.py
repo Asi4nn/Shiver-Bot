@@ -21,10 +21,10 @@ YTDL_OPTS = {
 class Video:
     """Class containing information about a particular video."""
 
-    def __init__(self, url_or_search, requested_by):
+    def __init__(self, video, requested_by):
         """Plays audio from (or searches for) a URL."""
         with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
-            video = self._get_info(url_or_search)
+            # video = self._get_info(url_or_search)
             video_format = video["formats"][0]
             self.stream_url = video_format["url"]
             self.video_url = video["webpage_url"]
@@ -37,6 +37,7 @@ class Video:
 
     def _get_info(self, video_url):
         with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
+            print(video_url)
             info = ydl.extract_info(video_url, download=False)
             video = None
             if "_type" in info and info["_type"] == "playlist":
@@ -79,14 +80,14 @@ class QueryManager:
     async def query_url(playlist: List[Video], url_or_search, requested_by, ctx: Context) -> List[Video]:
         new = playlist.copy()
         with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
-            info = ydl.extract_info(url_or_search, download=False)
+            info = ydl.extract_info(str(url_or_search), download=False)
             if "_type" in info and info["_type"] == "playlist":
                 for video in info["entries"]:
                     video_object = Video(video["url"], requested_by)
                     new.append(video_object)
                     await ctx.send("Added to queue.", embed=video_object.get_embed())
             else:
-                video_object = Video(info, requested_by)
+                video_object = Video(info, requested_by)    # passes in extracted video, not url
                 new.append(Video(info, requested_by))
                 await ctx.send("Added to queue.", embed=video_object.get_embed())
             return new
