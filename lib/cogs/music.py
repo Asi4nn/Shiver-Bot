@@ -156,7 +156,7 @@ class Music(Cog):
 
         if vc and vc.channel:
             try:
-                new = QueryManager.query_url(state.playlist, url, ctx.author)
+                new = await QueryManager.query_url(state.playlist, url, ctx.author, ctx)
             except youtube_dl.DownloadError as e:
                 print(f"Error downloading video: {e}")
                 await ctx.send("There was an error downloading your video")
@@ -166,7 +166,7 @@ class Music(Cog):
             if ctx.author is not None and ctx.author.voice.channel is not None:
                 channel = ctx.author.voice.channel
                 try:
-                    state.playlist = QueryManager.query_url(state.playlist, url, ctx.author)
+                    state.playlist = await QueryManager.query_url(state.playlist, url, ctx.author, ctx)
                 except youtube_dl.DownloadError as e:
                     await ctx.send("There was an error downloading your video")
                     return

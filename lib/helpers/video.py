@@ -8,8 +8,7 @@ YTDL_OPTS = {
     "default_search": "ytsearch",
     "format": "bestaudio/best",
     "quiet": True,
-    "username": "",
-    "password": "",
+    "cookiefile": "cookies.txt",
     "extract_flat": "in_playlist",
     "postprocessors": [{
         "key": "FFmpegExtractAudio",
@@ -77,7 +76,7 @@ class Video:
 
 class QueryManager:
     @staticmethod
-    def query_url(playlist: List[Video], url_or_search, requested_by, ctx: Context) -> List[Video]:
+    async def query_url(playlist: List[Video], url_or_search, requested_by, ctx: Context) -> List[Video]:
         new = playlist.copy()
         with ytdl.YoutubeDL(YTDL_OPTS) as ydl:
             info = ydl.extract_info(url_or_search, download=False)
