@@ -151,14 +151,14 @@ class Music(Cog):
             await ctx.voice_client.move_to(channel)
 
     @command(name="leave", aliases=["disconnect", "dc", "fuckoff"],
-             brief="Makes the bot join your voice channel if applicable")
+             brief="Makes the bot leave your voice channel if applicable")
     @guild_only()
     async def leave(self, ctx: Context):
         client = ctx.guild.voice_client
         state = self.get_state(ctx.guild)
         if client and client.channel:
             await client.disconnect()
-            await ctx.send(":wave: bye!")
+            await ctx.send(":wave: Bye!")
             state.playlist = []
             state.now_playing = None
 
@@ -181,7 +181,8 @@ class Music(Cog):
                 await ctx.send("There was an error downloading your video")
                 return
             state.playlist = new
-            self._play_song(vc.guild.voice_client, state, state.playlist.pop(0))
+            if not vc.is_playing():
+                self._play_song(vc.guild.voice_client, state, state.playlist.pop(0))
         else:
             if ctx.author is not None and ctx.author.voice.channel is not None:
                 channel = ctx.author.voice.channel
