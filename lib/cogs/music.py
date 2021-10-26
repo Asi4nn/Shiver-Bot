@@ -56,21 +56,26 @@ class Music(Cog):
 
     @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
-        if not member.bot and after.channel != before.channel:
-            if not [m for m in before.channel.members if not m.bot]:
-                await self.check_and_disconnect(member, before)
-        elif member.id == self.bot.user.id and not [m for m in after.channel.members if not m.bot]:
-            await self.check_and_disconnect(member, after)
+        """Auto leave after a delay and all members have left the channel"""
+        vc = member.guild.voice_client
+        if not vc:  # if not connected do nothing
+            return
 
-    async def check_and_disconnect(self, member, vc):
-        client = member.guild.voice_client
+        if not member.bot:
+            # check members after a member has left the bot's channel
+            if before and before.channel.id == vc.channel.id and not [m for m in before.channel.members if not m.bot]:
+                await self.check_and_disconnect(member, before.channel, vc)
+        elif member.id == self.bot.user.id and after.channel is not None:   # check channel if bot has been moved
+            if not [m for m in after.channel.members if not m.bot]:
+                await self.check_and_disconnect(member, after.channel, vc)
+
+    async def check_and_disconnect(self, member, channel, vc):
         state = self.get_state(member.guild)
-        if client and client.channel:
-            await asyncio.sleep(LEAVE_DELAY)
-            if not [m for m in vc.channel.members if not m.bot]:
-                await client.disconnect()
-                state.playlist = []
-                state.now_playing = None
+        await asyncio.sleep(LEAVE_DELAY)    # delay
+        if not [m for m in channel.members if not m.bot]:   # check again
+            await vc.disconnect()
+            state.playlist = []
+            state.now_playing = None
 
     def get_state(self, guild) -> GuildState:
         """Gets the state for `guild`, creating it if it does not exist."""
