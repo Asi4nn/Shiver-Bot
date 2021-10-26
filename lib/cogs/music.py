@@ -44,6 +44,7 @@ class GuildState:
         self.volume = 1.0
         self.playlist = []
         self.now_playing = None
+        self.looping = False
 
     def is_requester(self, user):
         return self.now_playing.requested_by == user
@@ -166,6 +167,7 @@ class Music(Cog):
             await ctx.send(":wave: Bye!")
             state.playlist = []
             state.now_playing = None
+            state.looping = False
 
     @command(name="play", aliases=["p"], brief="Plays a song from a YouTube url (pls don't sue me)")
     @guild_only()
@@ -197,8 +199,7 @@ class Music(Cog):
                     await ctx.send("There was an error downloading your video")
                     return
                 client = await channel.connect()
-                video = state.playlist.pop(0)
-                self._play_song(client, state, video)
+                self._play_song(client, state, state.playlist.pop(0))
             else:
                 await ctx.send("You need to be in a voice channel to do that")
 
@@ -210,7 +211,10 @@ class Music(Cog):
         def after_playing(err):
             if len(state.playlist) > 0:
                 next_song = state.playlist.pop(0)
-                self._play_song(client, state, next_song)
+                if state.looping:
+                    self._play_song(client, state, song)
+                else:
+                    self._play_song(client, state, next_song)
             # else:
             #     asyncio.run_coroutine_threadsafe(client.disconnect(), self.bot.loop)  # changed to dc after all members leave channel
 
@@ -235,6 +239,18 @@ class Music(Cog):
             await ctx.send("Paused")
         else:
             await ctx.send(f"Music bot is currently paused! (Type {PREFIX}play to resume)")
+
+    @command(name="loop", aliases=["repeat"], brief="Loops the current song (if applicable")
+    @guild_only()
+    @check(in_voice_channel)
+    async def loop(self, ctx: Context):
+        state = self.get_state(ctx.guild)
+        if state.looping:
+            state.looping = False
+            await ctx.send(":repeat: Looping current song")
+        else:
+            state.looping = True
+            await ctx.send(":repeat: Stopped looping")
 
 
 def setup(bot):
