@@ -127,6 +127,11 @@ class Music(Cog):
     async def skip(self, ctx):
         client = ctx.guild.voice_client
         client.stop()
+        state = self.get_state(ctx.guild)
+        if len(state.playlist) > 0:
+            state.now_playing = state.playlist.pop(0)
+        else:
+            state.now_playing = None
 
     @command(name="remove", aliases=["r"], brief="Remove the song at the given")
     @guild_only()
@@ -209,12 +214,12 @@ class Music(Cog):
             discord.FFmpegPCMAudio(song.stream_url, **FFMPEG_OPTIONS), volume=state.volume)
 
         def after_playing(err):
+            if state.looping and state.now_playing:
+                self._play_song(client, state, state.now_playing)
+
             if len(state.playlist) > 0:
                 next_song = state.playlist.pop(0)
-                if state.looping:
-                    self._play_song(client, state, song)
-                else:
-                    self._play_song(client, state, next_song)
+                self._play_song(client, state, next_song)
             # else:
             #     asyncio.run_coroutine_threadsafe(client.disconnect(), self.bot.loop)  # changed to dc after all members leave channel
 
@@ -247,10 +252,10 @@ class Music(Cog):
         state = self.get_state(ctx.guild)
         if state.looping:
             state.looping = False
-            await ctx.send(":repeat: Looping current song")
+            await ctx.send(":repeat: Stopped looping")
         else:
             state.looping = True
-            await ctx.send(":repeat: Stopped looping")
+            await ctx.send(":repeat: Looping current song")
 
 
 def setup(bot):
