@@ -1,12 +1,14 @@
 from random import randint, choice
 
 from discord import Embed, Colour, File
-from discord.errors import HTTPException
+from discord.errors import HTTPException, Forbidden
 from discord.ext.commands import Cog, Context, command, check, has_permissions
 
 from lib.db import db_postgresql
 from lib.bot import OWNER_IDS
 from ..helpers.is_mention import is_mention
+
+from time import sleep
 
 # CONTRIBUTORS: add your discord tag and github link in this dictionary
 CONTRIBUTORS = {
@@ -82,20 +84,35 @@ class General(Cog):
 
     @check(is_owner)
     @command(name="blend", brief="haha funny command")
-    async def blend(self, ctx: Context, mention: str, amount="10"):
+    async def blend(self, ctx: Context, mention: str, amount="5"):
         if not amount.isdigit():
             await ctx.send("Enter a valid number to blend")
             return
 
         if is_mention(mention):
-            member = ctx.guild.get_member(mention[3:len(mention) - 1])
+            member = ctx.guild.get_member(int(mention[3:len(mention) - 1]))
+            if not member:
+                await ctx.send("User not in guild...")
+                return
+
             if member.bot:
                 await ctx.send("Bots are immune to blending....")
+                return
 
             if member.voice:
-                channels = ctx.guild.channels
-                for i in range(int(amount)):
-                    await member.move_to(channel=choice(channels).id)
+                original_vc = member.voice.channel
+                channels = ctx.guild.voice_channels
+                channels.remove(original_vc)
+                i = 0
+                while i < int(amount):
+                    try:
+                        await member.move_to(channel=choice(channels))
+                        sleep(0.5)
+                        i += 1
+                    except Forbidden:
+                        pass
+
+                await member.move_to(channel=original_vc)
             else:
                 await ctx.send("User not in voice!")
         else:
