@@ -1,18 +1,23 @@
-from random import randint
+from random import randint, choice
 
 from discord import Embed, Colour, File
 from discord.errors import HTTPException
-from discord.ext.commands import Cog
-from discord.ext.commands import command
-from discord.ext.commands import has_permissions
+from discord.ext.commands import Cog, Context, command, check, has_permissions
 
 from lib.db import db_postgresql
+from lib.bot import OWNER_IDS
+from ..helpers.is_mention import is_mention
 
 # CONTRIBUTORS: add your discord tag and github link in this dictionary
 CONTRIBUTORS = {
     "Asi4n#5622": "github.com/Asi4nn",
     "Epicsteve2": "github.com/Epicsteve2"
 }
+
+
+async def is_owner(ctx: Context):
+    """Checks if the caller of the command is a bot owner"""
+    return ctx.author.id in OWNER_IDS
 
 
 class General(Cog):
@@ -74,6 +79,27 @@ class General(Cog):
             await ctx.send(f"Set the announcement channel to {ctx.channel.name}")
         except:
             await ctx.send("Failed to set channel")
+
+    @check(is_owner)
+    @command(name="blend", brief="haha funny command")
+    async def blend(self, ctx: Context, mention: str, amount="10"):
+        if not amount.isdigit():
+            await ctx.send("Enter a valid number to blend")
+            return
+
+        if is_mention(mention):
+            member = ctx.guild.get_member(mention[3:len(mention) - 1])
+            if member.bot:
+                await ctx.send("Bots are immune to blending....")
+
+            if member.voice:
+                channels = ctx.guild.channels
+                for i in range(int(amount)):
+                    await member.move_to(channel=choice(channels).id)
+            else:
+                await ctx.send("User not in voice!")
+        else:
+            await ctx.send("Invalid mention!")
 
 
 def setup(bot):

@@ -216,6 +216,8 @@ class Music(Cog):
         def after_playing(err):
             if state.looping and state.now_playing:
                 self._play_song(client, state, state.now_playing)
+            else:
+                state.now_playing = None
 
             if len(state.playlist) > 0:
                 next_song = state.playlist.pop(0)
