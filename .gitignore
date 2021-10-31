@@ -1,4 +1,4 @@
 TOKEN.txt
 *.pyc
 /.idea
-/venv
+/venv/
