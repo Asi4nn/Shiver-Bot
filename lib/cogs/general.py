@@ -82,7 +82,8 @@ class General(Cog):
         except:
             await ctx.send("Failed to set channel")
 
-    @check(is_owner)
+    # @check(is_owner)  # removing this would be a bad idea...
+    @has_permissions(move_members=True)
     @command(name="blend", brief="haha funny command")
     async def blend(self, ctx: Context, mention: str, amount="5"):
         if not amount.isdigit():
@@ -100,6 +101,7 @@ class General(Cog):
                 return
 
             if member.voice:
+                await ctx.send(f"Blending {mention}")
                 original_vc = member.voice.channel
                 channels = ctx.guild.voice_channels
                 channels.remove(original_vc)
