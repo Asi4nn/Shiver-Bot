@@ -2,7 +2,7 @@ from random import randint, choice
 
 from discord import Embed, Colour, File
 from discord.errors import HTTPException, Forbidden
-from discord.ext.commands import Cog, Context, command, check, has_permissions
+from discord.ext.commands import Cog, Context, command, check, has_permissions, has_guild_permissions
 
 from lib.db import db_postgresql
 from lib.bot import OWNER_IDS
@@ -83,8 +83,8 @@ class General(Cog):
             await ctx.send("Failed to set channel")
 
     # @check(is_owner)  # removing this would be a bad idea...
-    @has_permissions(move_members=True)
     @command(name="blend", brief="haha funny command")
+    @has_guild_permissions(move_members=True)
     async def blend(self, ctx: Context, mention: str, amount="5"):
         if not amount.isdigit():
             await ctx.send("Enter a valid number to blend")
