@@ -96,6 +96,19 @@ class General(Cog):
         except:
             await ctx.send("Failed to set channel")
 
+    @command(name="removecommandchannel", brief="Removes the command channel, if applicable")
+    @has_permissions(manage_guild=True)
+    async def removecommandchannel(self, ctx):
+        try:
+            db_postgresql.execute("INSERT INTO channels(GuildID, cmdchannel) "
+                                  "VALUES (%s, NULL) "
+                                  "ON CONFLICT(GuildID) "
+                                  "DO UPDATE SET cmdchannel = NULL",
+                                  ctx.guild.id)
+            await ctx.send(f"Set the command channel to {ctx.channel.name}")
+        except:
+            await ctx.send("Failed to set channel")
+
     # @check(is_owner)  # removing this would be a bad idea...
     @command(name="blend", brief="haha funny command")
     @has_guild_permissions(move_members=True)

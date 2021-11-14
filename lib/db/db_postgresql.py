@@ -46,9 +46,27 @@ def connect():
     global conn
 
     # modify db
-    conn.execute('''
-        ALTER TABLE channels ADD COLUMN IF NOT EXISTS cmdchannel bigint;
-    ''')
+    conn.execute('''CREATE TABLE IF NOT EXISTS birthdays (
+                            UserID bigint PRIMARY KEY,
+                            GuildID bigint,
+                            date text
+                        );
+
+                        CREATE TABLE IF NOT EXISTS channels (
+                            GuildID bigint PRIMARY KEY,
+                            channel bigint,
+                            cmdchannel bigint
+                        );
+
+                        CREATE TABLE IF NOT EXISTS messages (
+                            MessageID bigint PRIMARY KEY,
+                            guild text,
+                            channel text,
+                            author text,
+                            time text,
+                            message text,
+                            status text
+                        );''')
 
     time = datetime.now().strftime("[%H:%M:%S]")
     print(time, "Connected to Database")
