@@ -61,18 +61,20 @@ class Bot(BaseBot):
         send_channel = get(self.get_guild(guild).text_channels, id=channel)
         await send_channel.send(f"@here Happy Birthday to {mention} who's turning {age} today!")
 
-    async def birthday_trigger(self):
-        bdays = db.column("SELECT date FROM birthdays")
-        users = db.column("SELECT UserID FROM birthdays")
-        user_guilds = db.column("SELECT GuildID FROM birthdays")
-        channels = db.column("SELECT channel FROM channels")
-        guildIDs = db.column("SELECT GuildID FROM channels")
+    def get_channel(self, guildID):
+        return db.field("SELECT channel FROM channels WHERE GuildID = %s", guildID)
 
-        for i in range(len(bdays)):
-            if int(bdays[i][0:2]) == datetime.today().day and int(bdays[i][3:5]) == datetime.today().month:
-                channel = channels[guildIDs.index(user_guilds[i])]
-                age = datetime.today().year - int(bdays[i][6:])
-                await self.announce_birthday(user_guilds[i], int(channel), f'<@!{users[i]}>', age)
+    def get_command_channel(self, guildID):
+        return db.field("SELECT cmdchannel FROM channels WHERE GuildID = %s", guildID)
+
+    async def birthday_trigger(self):
+        bdays = db.records("SELECT UserID, date, GuildID FROM birthdays")
+
+        for record in bdays:
+            if int(bdays.date[0:2]) == datetime.today().day and int(bdays[3:5]) == datetime.today().month:
+                channel = self.get_channel(record.GuildID)
+                age = datetime.today().year - int(bdays[6:])
+                await self.announce_birthday(record.GuildID, int(channel), f'<@!{record.UserID}>', age)
 
     async def on_connect(self):
         print(get_current_time(), "Logged in as {0.user}".format(self))
@@ -117,8 +119,12 @@ class Bot(BaseBot):
 
     # YOU NEED THIS FOR COMMANDS TO WORK
     async def on_message(self, message):
-        if not message.author.bot:
-            await self.process_commands(message)
+        cmdchannel = self.get_command_channel(message.guild.id)
+        if cmdchannel:
+            if message.channel.id and not message.author.bot:
+                await self.process_commands(message)
+            else:
+                print("Command outside of command channel")
 
 
 bot = Bot()
