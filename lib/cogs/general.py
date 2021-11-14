@@ -1,4 +1,5 @@
 from random import randint, choice
+from re import fullmatch
 
 from discord import Embed, Colour, File
 from discord.errors import HTTPException, Forbidden
@@ -55,6 +56,8 @@ class General(Cog):
 
     @command(name="roll", aliases=['dice'], brief="Rolls some dice of your choice!")
     async def roll_dice(self, ctx, dice_type: str):
+        if not fullmatch("\dd\d", dice_type):
+            await ctx.send("Invalid dice format, (use ndm, where n is the number of dice and m is the number of faces")
         dice, value = [int(v) for v in dice_type.lower().split("d")]
         if dice <= 0 or value <= 0:
             await ctx.send("You can't roll negative values dummy")
@@ -105,7 +108,7 @@ class General(Cog):
                                   "ON CONFLICT(GuildID) "
                                   "DO UPDATE SET cmdchannel = NULL",
                                   ctx.guild.id)
-            await ctx.send(f"Set the command channel to {ctx.channel.name}")
+            await ctx.send(f"Removed command channel")
         except:
             await ctx.send("Failed to set channel")
 

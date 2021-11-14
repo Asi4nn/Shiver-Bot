@@ -120,8 +120,8 @@ class Bot(BaseBot):
     # YOU NEED THIS FOR COMMANDS TO WORK
     async def on_message(self, message):
         cmdchannel = self.get_command_channel(message.guild.id)
-        if cmdchannel:
-            if message.channel.id and not message.author.bot:
+        if cmdchannel and not message.author.bot:
+            if message.channel.id == cmdchannel:
                 await self.process_commands(message)
             else:
                 print("Command outside of command channel")
