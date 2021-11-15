@@ -81,7 +81,7 @@ class General(Cog):
                                   "ON CONFLICT(GuildID) "
                                   "DO UPDATE SET channel = %s",
                                   ctx.guild.id, ctx.channel.id, ctx.channel.id)
-            await ctx.send(f"Set the announcement channel to {ctx.channel.name}")
+            await ctx.send(f"Set the announcement channel to {ctx.channel.mention}")
         except:
             await ctx.send("Failed to set channel")
 
@@ -95,7 +95,7 @@ class General(Cog):
                                   "ON CONFLICT(GuildID) "
                                   "DO UPDATE SET cmdchannel = %s",
                                   ctx.guild.id, ctx.channel.id, ctx.channel.id)
-            await ctx.send(f"Set the command channel to {ctx.channel.name}")
+            await ctx.send(f"Set the command channel to {ctx.channel.mention}")
         except:
             await ctx.send("Failed to set channel")
 
