@@ -50,8 +50,6 @@ class Bot(BaseBot):
         print(get_current_time(), "Bot is running")
         # db_postgresql.connect()
 
-        await self.change_presence(activity=discord.Game(f"{PREFIX}help"))
-
         super().run(self.token, reconnect=True)
 
     def load_cogs(self):
@@ -116,6 +114,7 @@ class Bot(BaseBot):
 
             self.ready = True
             print(get_current_time(), "Bot is ready")
+            await self.change_presence(activity=discord.Game(f"{PREFIX}help"))
         else:
             print(get_current_time(), "Bot reconnected")
 
