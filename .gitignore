@@ -2,3 +2,5 @@ TOKEN.txt
 *.pyc
 /.idea
 /venv/
+
+cookies.txt
