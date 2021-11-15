@@ -50,6 +50,8 @@ class Bot(BaseBot):
         print(get_current_time(), "Bot is running")
         # db_postgresql.connect()
 
+        self.change_presence(status="Type $help")
+
         super().run(self.token, reconnect=True)
 
     def load_cogs(self):

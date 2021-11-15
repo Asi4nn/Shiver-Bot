@@ -39,10 +39,6 @@ def build():
                         status text
                     );''')
 
-    # temp modification to add cmdchannel (idk a better way to do this)
-    conn.execute('''
-            ALTER TABLE channels ADD COLUMN IF NOT EXISTS cmdchannel bigint
-        ''')
     time = datetime.now().strftime("[%H:%M:%S]")
     print(time, "Built database")
 
