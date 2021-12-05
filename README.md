@@ -5,7 +5,7 @@ General use discord bot for small communities
 
 - Birthday Tracker + Announcer
 - Message logger (currently disabled)
-- Music player
+- Music player (for YouTube)
 - A myriad of helpful info commands
 
 ## Usage
