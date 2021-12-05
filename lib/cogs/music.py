@@ -133,7 +133,7 @@ class Music(Cog):
         else:
             state.now_playing = None
 
-    @command(name="remove", aliases=["r"], brief="Remove the song at the given")
+    @command(name="remove", aliases=["r"], brief="Remove the song at the given queue index")
     @guild_only()
     @check(audio_playing)
     @check(in_voice_channel)

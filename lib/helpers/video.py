@@ -15,7 +15,7 @@ YTDL_OPTS = {
         "preferredcodec": "mp3",
         "preferredquality": "192"
     }],
-    'forceip': '4',
+    "forceip": "4",
 }
 
 

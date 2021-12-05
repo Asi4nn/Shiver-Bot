@@ -124,8 +124,6 @@ class Bot(BaseBot):
         if cmdchannel and not message.author.bot:
             if message.channel.id == cmdchannel:
                 await self.process_commands(message)
-            else:
-                print("Command outside of command channel")
         else:
             if not message.author.bot:
                 await self.process_commands(message)
