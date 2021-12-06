@@ -96,7 +96,10 @@ class Music(Cog):
     async def nowplaying(self, ctx):
         """Displays information about the current song."""
         state = self.get_state(ctx.guild)
-        await ctx.send("", embed=state.now_playing.get_embed())
+        if state.now_playing:
+            await ctx.send("", embed=state.now_playing.get_embed())
+        else:
+            await ctx.send("Not currently playing")
 
     @command(name="queue", aliases=["q", "playlist"], brief="Displays the song queue")
     @guild_only()
@@ -127,11 +130,7 @@ class Music(Cog):
     async def skip(self, ctx):
         client = ctx.guild.voice_client
         client.stop()
-        state = self.get_state(ctx.guild)
-        if len(state.playlist) > 0:
-            state.now_playing = state.playlist.pop(0)
-        else:
-            state.now_playing = None
+        await ctx.send("Skipping")
 
     @command(name="remove", aliases=["r"], brief="Remove the song at the given queue index")
     @guild_only()
@@ -174,7 +173,7 @@ class Music(Cog):
             state.now_playing = None
             state.looping = False
 
-    @command(name="play", aliases=["p"], brief="Plays a song from a YouTube url (pls don't sue me)")
+    @command(name="play", aliases=["p"], brief="Plays a song from a YouTube url, or resumes playing if paused")
     @guild_only()
     async def play(self, ctx: Context, *, url: Optional[str]):
         vc: discord.VoiceClient = ctx.guild.voice_client
@@ -191,6 +190,9 @@ class Music(Cog):
             except youtube_dl.DownloadError as e:
                 print(f"Error downloading video: {e}")
                 await ctx.send("There was an error downloading your video")
+                return
+            except:
+                await ctx.send("There was an error retrieving your video")
                 return
             state.playlist = new
             if not vc.is_playing():
