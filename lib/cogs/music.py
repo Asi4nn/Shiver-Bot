@@ -35,6 +35,7 @@ async def in_voice_channel(ctx):
         return True
     else:
         await ctx.send("You need to be in the channel to do that")
+        return False
 
 
 class GuildState:
@@ -178,6 +179,8 @@ class Music(Cog):
     async def play(self, ctx: Context, *, url: Optional[str]):
         vc: discord.VoiceClient = ctx.guild.voice_client
         state = self.get_state(ctx.guild)
+        if vc and vc.channel and not in_voice_channel(ctx):
+            return
 
         if vc and vc.is_paused() and not url:   # resumes play if no url param
             vc.resume()
