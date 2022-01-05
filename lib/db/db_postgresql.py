@@ -6,7 +6,7 @@ from sqlalchemy.engine.mock import MockConnection
 from dotenv import load_dotenv
 load_dotenv()
 
-USE_DB = environ['USE_DB'] != 'false'
+USE_DB = environ['USE_DB'].strip() == 'true'
 
 
 try:

@@ -21,7 +21,7 @@ load_dotenv()
 
 
 TOKEN = environ['TOKEN'].strip()
-USE_DB = environ['USE_DB'].strip() != 'false'
+USE_DB = environ['USE_DB'].strip() == 'true'
 PREFIX = '$'
 OWNER_IDS = [164144088818515968]
 COGS = []
@@ -81,6 +81,8 @@ class Bot(BaseBot):
 
     async def on_connect(self):
         print(get_current_time(), "Logged in as {0.user}".format(self))
+        if not USE_DB:
+            SystemExit(1)
 
     async def on_disconnect(self):
         print(get_current_time(), "Bot disconnected")
@@ -119,9 +121,6 @@ class Bot(BaseBot):
             self.ready = True
             print(get_current_time(), "Bot is ready")
             await self.change_presence(activity=discord.Game(f"{PREFIX}help"))
-
-            if not USE_DB:
-                SystemExit(1)
         else:
             print(get_current_time(), "Bot reconnected")
 
