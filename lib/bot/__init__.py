@@ -21,6 +21,8 @@ load_dotenv()
 
 
 TOKEN = environ['TOKEN'].strip()
+print(TOKEN)
+USE_DB = environ['USE_DB'] != 'false'
 PREFIX = '$'
 OWNER_IDS = [164144088818515968]
 COGS = []
@@ -111,8 +113,9 @@ class Bot(BaseBot):
     async def on_ready(self):
         if not self.ready:
             # Daily birthday checker
-            self.scheduler.add_job(self.birthday_trigger, CronTrigger(second="0", minute="0", hour="12"))
-            self.scheduler.start()
+            if USE_DB:
+                self.scheduler.add_job(self.birthday_trigger, CronTrigger(second="0", minute="0", hour="12"))
+                self.scheduler.start()
 
             self.ready = True
             print(get_current_time(), "Bot is ready")

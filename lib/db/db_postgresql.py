@@ -3,10 +3,11 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.engine.mock import MockConnection
 
-try:
-    USE_DB = environ['USE_DB'] != 'false'
-except KeyError:
-    USE_DB = False
+from dotenv import load_dotenv
+load_dotenv()
+
+USE_DB = environ['USE_DB'] != 'false'
+
 
 try:
     DATABASE_URL = environ['DATABASE_URL']
