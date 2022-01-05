@@ -1,3 +1,4 @@
+[![Worker](https://github.com/Asi4nn/Shiver-Bot/actions/workflows/python-app.yml/badge.svg?branch=main)](https://github.com/Asi4nn/Shiver-Bot/actions/workflows/python-app.yml)
 # Shiver Bot
 General use discord bot for small communities
 
