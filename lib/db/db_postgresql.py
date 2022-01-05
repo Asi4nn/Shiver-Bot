@@ -3,10 +3,10 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.engine.mock import MockConnection
 
-USE_DB = environ['USE_DB']
-
-if not USE_DB:
-    raise SystemExit(0)
+try:
+    USE_DB = environ['USE_DB'] != 'false'
+except KeyError:
+    USE_DB = False
 
 try:
     DATABASE_URL = environ['DATABASE_URL']
@@ -15,9 +15,10 @@ try:
 except KeyError:
     DATABASE_URL = "postgresql+psycopg2://postgres:Leowang14@127.0.0.1:5432/postgres"
 
-engine = create_engine(DATABASE_URL, echo=False)
 
-conn: MockConnection = engine.connect().execution_options(autocommit=True)
+if USE_DB:
+    engine = create_engine(DATABASE_URL, echo=False)
+    conn: MockConnection = engine.connect().execution_options(autocommit=True)
 
 
 # build db
