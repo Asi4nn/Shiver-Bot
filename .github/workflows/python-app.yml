@@ -1,4 +1,7 @@
-name: Build
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Worker
 
 on:
   push:
@@ -9,6 +12,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: shiver-bot
 
     steps:
     - uses: actions/checkout@v2
@@ -27,11 +31,13 @@ jobs:
         flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Run bot
-      env:
-        TOKEN: ${{ secrets.TOKEN }}
-        USE_DB: false
-      run: |
-        # run the bot with launcher worker
-        echo "Running with token: $TOKEN"
-        python launcher.py
+#    This doesn't fucking work
+#    - name: Run bot
+#      env:
+#        TOKEN: ${{ secrets.TOKEN }}
+#        USE_DB: "false"
+#      run: |
+#        # run the bot with launcher worker
+#        echo "Running with TOKEN: $TOKEN"
+#        echo "Running with USE_DB: $USE_DB"
+#        python launcher.py
