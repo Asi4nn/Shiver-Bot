@@ -21,8 +21,7 @@ load_dotenv()
 
 
 TOKEN = environ['TOKEN'].strip()
-print(TOKEN)
-USE_DB = environ['USE_DB'] != 'false'
+USE_DB = environ['USE_DB'].strip() != 'false'
 PREFIX = '$'
 OWNER_IDS = [164144088818515968]
 COGS = []
