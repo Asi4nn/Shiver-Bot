@@ -12,11 +12,12 @@ from discord.utils import get
 from ..helpers.getTime import get_current_time
 from lib.db import db_postgresql as db
 
-from os import listdir
+from os import listdir, environ
 from os.path import sep
 
 import re
 
+TOKEN = environ['TOKEN']
 PREFIX = '$'
 OWNER_IDS = [164144088818515968]
 COGS = []
@@ -38,17 +39,15 @@ class Bot(BaseBot):
         self.scheduler = AsyncIOScheduler()
         self.token = None
 
-        # db_postgresql.autosave(self.scheduler)
         super().__init__(command_prefix=get_prefix, owner_ids=OWNER_IDS, intents=discord.Intents.all())
 
     def run(self):
-        with open(sep.join(["lib", "bot", "TOKEN.txt"]), 'r', encoding="utf-8") as token:
-            self.token = token.read()
+        # with open(sep.join(["lib", "bot", "TOKEN.txt"]), 'r', encoding="utf-8") as token:
+        self.token = TOKEN
 
         self.load_cogs()
 
         print(get_current_time(), "Bot is running")
-        # db_postgresql.connect()
 
         super().run(self.token, reconnect=True)
 

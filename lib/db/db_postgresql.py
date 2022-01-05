@@ -3,6 +3,11 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.engine.mock import MockConnection
 
+USE_DB = environ['USE_DB']
+
+if not USE_DB:
+    raise SystemExit(0)
+
 try:
     DATABASE_URL = environ['DATABASE_URL']
     split = DATABASE_URL.split("//")
