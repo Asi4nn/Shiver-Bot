@@ -5,7 +5,7 @@ from datetime import datetime
 
 from discord.ext.commands import Bot as BaseBot
 from discord.ext.commands import when_mentioned_or
-from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument, MissingPermissions, CheckFailure)
+from discord.ext.commands import (CommandNotFound, BadArgument, MissingRequiredArgument, MissingPermissions)
 from discord.errors import HTTPException, Forbidden
 from discord.utils import get
 
@@ -13,12 +13,14 @@ from ..helpers.getTime import get_current_time
 from lib.db import db_postgresql as db
 
 from os import listdir, environ
-from os.path import sep
 
 import re
 
+from dotenv import load_dotenv
+load_dotenv()
 
-TOKEN = str(environ['TOKEN'])
+
+TOKEN = environ['TOKEN'].strip()
 PREFIX = '$'
 OWNER_IDS = [164144088818515968]
 COGS = []
