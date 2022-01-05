@@ -119,6 +119,9 @@ class Bot(BaseBot):
             self.ready = True
             print(get_current_time(), "Bot is ready")
             await self.change_presence(activity=discord.Game(f"{PREFIX}help"))
+
+            if not USE_DB:
+                SystemExit(1)
         else:
             print(get_current_time(), "Bot reconnected")
 
