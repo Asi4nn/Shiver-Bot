@@ -81,8 +81,6 @@ class Bot(BaseBot):
 
     async def on_connect(self):
         print(get_current_time(), "Logged in as {0.user}".format(self))
-        if not USE_DB:
-            SystemExit(1)
 
     async def on_disconnect(self):
         print(get_current_time(), "Bot disconnected")

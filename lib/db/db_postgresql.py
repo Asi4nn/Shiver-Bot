@@ -20,7 +20,8 @@ except KeyError:
 if USE_DB:
     engine = create_engine(DATABASE_URL, echo=False)
     conn: MockConnection = engine.connect().execution_options(autocommit=True)
-
+else:
+    SystemExit(0)
 
 # build db
 def build():
