@@ -34,8 +34,9 @@ jobs:
     - name: Run bot
       env:
         TOKEN: ${{ secrets.TOKEN }}
-        USE_DB: false
+        USE_DB: "false"
       run: |
         # run the bot with launcher worker
-        echo "Running with token: $TOKEN"
+        echo "Running with TOKEN: $TOKEN"
+        echo "Running with USE_DB: $USE_DB"
         python launcher.py
