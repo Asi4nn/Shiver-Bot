@@ -17,7 +17,8 @@ from os.path import sep
 
 import re
 
-TOKEN = environ['TOKEN']
+
+TOKEN = str(environ['TOKEN'])
 PREFIX = '$'
 OWNER_IDS = [164144088818515968]
 COGS = []
