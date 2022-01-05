@@ -1,4 +1,4 @@
-name: Worker
+name: Build
 
 on:
   push:
@@ -30,8 +30,8 @@ jobs:
         flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Run bot
       env: 
-        TOKEN: ${{ secrets.TOKEN }}
-        USE_DB: ${{ secrets.USE_DB }}
+        TOKEN: ${{ env.TOKEN }}
+        USE_DB: ${{ env.USE_DB }}
       run: |
         # run the bot with launcher worker
         python launcher.py
