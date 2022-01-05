@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-
+    environment: shiver-bot
     runs-on: ubuntu-latest
 
     steps:
