@@ -65,7 +65,7 @@ class Music(Cog):
 
         if not member.bot:
             # check members after a member has left the bot's channel
-            if before and before.channel.id == vc.channel.id and not [m for m in before.channel.members if not m.bot]:
+            if before and before.channel and before.channel.id == vc.channel.id and not [m for m in before.channel.members if not m.bot]:
                 await self.check_and_disconnect(member, before.channel, vc)
         elif member.id == self.bot.user.id and after.channel is not None:   # check channel if bot has been moved
             if not [m for m in after.channel.members if not m.bot]:
@@ -179,7 +179,7 @@ class Music(Cog):
     async def play(self, ctx: Context, *, url: Optional[str]):
         vc: discord.VoiceClient = ctx.guild.voice_client
         state = self.get_state(ctx.guild)
-        if vc and vc.channel and not in_voice_channel(ctx):
+        if vc and vc.channel and not await in_voice_channel(ctx):
             return
 
         if vc and vc.is_paused() and not url:   # resumes play if no url param
