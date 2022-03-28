@@ -2,12 +2,13 @@ from random import randint, choice
 from re import fullmatch
 
 from discord import Embed, Colour, File
+from discord import utils
 from discord.errors import HTTPException, Forbidden
-from discord.ext.commands import Cog, Context, command, check, has_permissions, has_guild_permissions
+from discord.ext.commands import Cog, Context, command, has_permissions, has_guild_permissions
 
-from lib.db import db_postgresql
-from lib.bot import OWNER_IDS
-from ..helpers.is_mention import is_mention
+from lib.bot import OWNER_IDS, PREFIX
+from lib.helpers.is_mention import is_mention
+from lib.db import bot_queries
 
 from time import sleep
 
@@ -30,6 +31,15 @@ class General(Cog):
     @Cog.listener()
     async def on_ready(self):
         print("General cog ready")
+
+    @Cog.listener()
+    async def on_guild_join(self, guild):
+        try:
+            general = utils.get(guild.text_channels, name="general")
+            bot_queries.get_announcement_channel(general.id)
+        except:
+            await guild.text_channels[0].send(f"No general channel found! Set a announcement channel using "
+                                              f"{PREFIX}channel")
 
     @command(name="ping", brief="Get the latency between the bot and the server")
     async def ping(self, ctx):
@@ -72,45 +82,28 @@ class General(Cog):
         if isinstance(exc.original, HTTPException):
             await ctx.send("Result is too large D:")
 
-    @command(name="channel", brief="Set the channel for announcements")
+    @command(name="channel", aliases=["announcement_channel"], brief="Set the channel for announcements")
     @has_permissions(manage_guild=True)
-    async def channel(self, ctx):
-        try:
-            db_postgresql.execute("INSERT INTO channels(GuildID, channel) "
-                                  "VALUES (%s, %s) "
-                                  "ON CONFLICT(GuildID) "
-                                  "DO UPDATE SET channel = %s",
-                                  ctx.guild.id, ctx.channel.id, ctx.channel.id)
-            await ctx.send(f"Set the announcement channel to {ctx.channel.mention}")
-        except:
-            await ctx.send("Failed to set channel")
+    async def channel(self, ctx, channel):
+        if bot_queries.set_channel(ctx.guild.id, int(channel[2: len(channel) - 1])):
+            return await ctx.send(f"Set the announcement channel to {channel}")
+        await ctx.send("Failed to set channel")
 
-    @command(name="commandchannel", brief="Set the channel for commands, if this is not set, users can type "
-                                          "commands anywhere")
+    @command(name="command_channel", aliases=["cmd_channel"],
+             brief="Set the channel for commands, if this is not set, users can type commands anywhere")
     @has_permissions(manage_guild=True)
-    async def commandchannel(self, ctx):
-        try:
-            db_postgresql.execute("INSERT INTO channels(GuildID, cmdchannel) "
-                                  "VALUES (%s, %s) "
-                                  "ON CONFLICT(GuildID) "
-                                  "DO UPDATE SET cmdchannel = %s",
-                                  ctx.guild.id, ctx.channel.id, ctx.channel.id)
-            await ctx.send(f"Set the command channel to {ctx.channel.mention}")
-        except:
-            await ctx.send("Failed to set channel")
+    async def command_channel(self, ctx):
+        if bot_queries.set_command_channel(ctx.guild.id, ctx.channel.id):
+            return await ctx.send(f"Set the command channel to {ctx.channel.mention}")
+        await ctx.send("Failed to set channel")
 
-    @command(name="removecommandchannel", brief="Removes the command channel, if applicable")
+    @command(name="removecommandchannel", aliases=["rm_cmd_channel", "remove_command_channel"],
+             brief="Removes the command channel, if applicable")
     @has_permissions(manage_guild=True)
     async def removecommandchannel(self, ctx):
-        try:
-            db_postgresql.execute("INSERT INTO channels(GuildID, cmdchannel) "
-                                  "VALUES (%s, NULL) "
-                                  "ON CONFLICT(GuildID) "
-                                  "DO UPDATE SET cmdchannel = NULL",
-                                  ctx.guild.id)
-            await ctx.send(f"Removed command channel")
-        except:
-            await ctx.send("Failed to set channel")
+        if bot_queries.remove_command_channel(ctx.guild.id):
+            return await ctx.send(f"Removed command channel")
+        await ctx.send("Failed to remove channel")
 
     # @check(is_owner)  # removing this would be a bad idea...
     @command(name="blend", brief="haha funny command")

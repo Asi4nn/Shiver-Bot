@@ -64,7 +64,7 @@ class Music(Cog):
             return
 
         if not member.bot:
-            # check members after a member has left the bot's channel
+            # check members after a member has left the bots channel
             if before and before.channel and before.channel.id == vc.channel.id and not [m for m in before.channel.members if not m.bot]:
                 await self.check_and_disconnect(member, before.channel, vc)
         elif member.id == self.bot.user.id and after.channel is not None:   # check channel if bot has been moved
