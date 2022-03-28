@@ -23,7 +23,6 @@ class Birthday(Cog):
                                                       "date must be in the form DD/MM/YYYY")
     async def birthday(self, ctx: Context, date):
         date = date.strip()
-        guild: discord.Guild = ctx.guild
         if self.validate_birthday(ctx.author.mention, date):
             if bot_queries.set_birthday(ctx.author.id, ctx.guild.id, date):
                 return await ctx.send(f"Added birthdate {date} for {ctx.author.mention}")

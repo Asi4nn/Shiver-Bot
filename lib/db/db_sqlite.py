@@ -3,7 +3,6 @@
 #####################################################
 
 from os.path import isfile, dirname, abspath, join
-from os import chdir
 from sqlite3 import connect
 from datetime import datetime
 from apscheduler.triggers.cron import CronTrigger

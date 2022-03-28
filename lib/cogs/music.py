@@ -207,6 +207,7 @@ class Music(Cog):
                     state.playlist = await QueryManager.query_url(state.playlist, url, ctx.author, ctx)
                 except youtube_dl.DownloadError as e:
                     await ctx.send("There was an error downloading your video")
+                    print(e)
                     return
                 client = await channel.connect()
                 self._play_song(client, state, state.playlist.pop(0))

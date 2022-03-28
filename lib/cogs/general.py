@@ -34,12 +34,12 @@ class General(Cog):
 
     @Cog.listener()
     async def on_guild_join(self, guild):
-        try:
-            general = utils.get(guild.text_channels, name="general")
-            bot_queries.get_announcement_channel(general.id)
-        except:
-            await guild.text_channels[0].send(f"No general channel found! Set a announcement channel using "
-                                              f"{PREFIX}channel")
+        general = utils.get(guild.text_channels, name="general")
+        if general is not None:
+            bot_queries.set_channel(general.id)
+
+        await guild.text_channels[0].send(f"No general channel found! Set an announcement channel using "
+                                          "{PREFIX}channel")
 
     @command(name="ping", brief="Get the latency between the bot and the server")
     async def ping(self, ctx):
@@ -66,7 +66,7 @@ class General(Cog):
 
     @command(name="roll", aliases=['dice'], brief="Rolls some dice of your choice!")
     async def roll_dice(self, ctx, dice_type: str):
-        if not fullmatch("\dd\d", dice_type):
+        if not fullmatch(r"\dd\d", dice_type):
             await ctx.send("Invalid dice format, (use ndm, where n is the number of dice and m is the number of faces")
         dice, value = [int(v) for v in dice_type.lower().split("d")]
         if dice <= 0 or value <= 0:
@@ -102,7 +102,7 @@ class General(Cog):
     @has_permissions(manage_guild=True)
     async def removecommandchannel(self, ctx):
         if bot_queries.remove_command_channel(ctx.guild.id):
-            return await ctx.send(f"Removed command channel")
+            return await ctx.send("Removed command channel")
         await ctx.send("Failed to remove channel")
 
     # @check(is_owner)  # removing this would be a bad idea...
