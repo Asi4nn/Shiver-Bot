@@ -38,8 +38,8 @@ class General(Cog):
         if general is not None:
             bot_queries.set_channel(general.id)
 
-        await guild.text_channels[0].send(f"No general channel found! Set an announcement channel using "
-                                          "{PREFIX}channel")
+        await guild.text_channels[0].send("No general channel found! Set an announcement channel using "
+                                          f"{PREFIX}channel")
 
     @command(name="ping", brief="Get the latency between the bot and the server")
     async def ping(self, ctx):
