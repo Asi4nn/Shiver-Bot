@@ -194,7 +194,8 @@ class Music(Cog):
                 print(f"Error downloading video: {e}")
                 await ctx.send("There was an error downloading your video")
                 return
-            except:
+            except Exception as e:
+                print(e)
                 await ctx.send("There was an error retrieving your video")
                 return
             state.playlist = new
