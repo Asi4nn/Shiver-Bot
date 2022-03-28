@@ -1,4 +1,3 @@
-import discord
 from discord.ext.commands import Cog, Context
 from discord.ext.commands import command
 from discord.ext.commands import has_permissions
