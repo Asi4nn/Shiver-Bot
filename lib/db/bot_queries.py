@@ -2,8 +2,10 @@
 This file for storing functions to contain SQL queries to not pollute the rest of the bot code with
 ugly query strings
 """
+import logging
 from typing import List, Tuple, Union
 from lib.db import db_postgresql as db
+from sqlalchemy.exc import SQLAlchemyError
 
 
 def set_channel(guild_id: int, channel_id: int) -> bool:
@@ -20,7 +22,8 @@ def set_channel(guild_id: int, channel_id: int) -> bool:
                    "DO UPDATE SET channel = %s",
                    guild_id, channel_id, channel_id)
         return True
-    except:
+    except SQLAlchemyError as e:
+        logging.error(exc_info=e)
         return False
 
 
@@ -38,7 +41,8 @@ def set_command_channel(guild_id: int, channel_id: int) -> bool:
                    "DO UPDATE SET cmdchannel = %s",
                    guild_id, channel_id, channel_id)
         return True
-    except:
+    except SQLAlchemyError as e:
+        logging.error(exc_info=e)
         return False
 
 
@@ -55,7 +59,8 @@ def remove_command_channel(guild_id: int) -> bool:
                    "DO UPDATE SET cmdchannel = NULL",
                    guild_id)
         return True
-    except:
+    except SQLAlchemyError as e:
+        logging.error(exc_info=e)
         return False
 
 
@@ -67,7 +72,8 @@ def get_announcement_channel(guild_id: int) -> Union[int, None]:
     """
     try:
         return db.field("SELECT channel FROM channels WHERE GuildID = %s", guild_id)
-    except:
+    except SQLAlchemyError as e:
+        logging.error(exc_info=e)
         return None
 
 
@@ -79,7 +85,8 @@ def get_command_channel(guild_id: int) -> Union[int, None]:
     """
     try:
         return db.field("SELECT cmdchannel FROM channels WHERE GuildID = %s", guild_id)
-    except:
+    except SQLAlchemyError as e:
+        logging.error(exc_info=e)
         return None
 
 
@@ -110,5 +117,6 @@ def set_birthday(user_id: int, guild_id: int, date: str) -> bool:
                    "DO UPDATE SET date = %s",
                    user_id, guild_id, date, date)
         return True
-    except:
+    except SQLAlchemyError as e:
+        logging.error(exc_info=e)
         return False
