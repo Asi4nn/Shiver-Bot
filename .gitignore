@@ -3,3 +3,4 @@ TOKEN.txt
 /.idea
 /venv/
 .env
+/lib/cogs/dev.py

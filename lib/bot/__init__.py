@@ -10,15 +10,16 @@ from discord.errors import HTTPException, Forbidden
 from discord.utils import get
 
 from ..helpers.getTime import get_current_time
-from lib.db import db_postgresql as db
+from ..db import bot_queries
+from typing import Union
 
 from os import listdir, environ
 
 import re
 
 from dotenv import load_dotenv
-load_dotenv()
 
+load_dotenv()
 
 TOKEN = environ['TOKEN'].strip()
 USE_DB = environ['USE_DB'].strip() == 'true'
@@ -28,7 +29,7 @@ COGS = []
 IGNORE_EXCEPTIONS = (CommandNotFound, BadArgument)
 
 for filename in listdir('./lib/cogs'):
-    if filename.endswith('.py') and filename[:-3] != "log":     # disable message logging for saving db storage
+    if filename.endswith('.py') and filename[:-3] != "log":  # disable message logging for saving db storage
         COGS.append(f'lib.cogs.{filename[:-3]}')
 
 
@@ -64,20 +65,25 @@ class Bot(BaseBot):
         send_channel = get(self.get_guild(guild).text_channels, id=channel)
         await send_channel.send(f"@here Happy Birthday to {mention} who's turning {age} today!")
 
-    def get_channel(self, guildID):
-        return db.field("SELECT channel FROM channels WHERE GuildID = %s", guildID)
+    def get_announcement_channel(self, guild_id) -> Union[int, None]:
+        return bot_queries.get_announcement_channel(guild_id)
 
-    def get_command_channel(self, guildID):
-        return db.field("SELECT cmdchannel FROM channels WHERE GuildID = %s", guildID)
+    def get_command_channel(self, guild_id) -> Union[int, None]:
+        return bot_queries.get_command_channel(guild_id)
 
     async def birthday_trigger(self):
-        bdays = db.records("SELECT UserID, date, GuildID FROM birthdays")
+        bdays = bot_queries.get_birthdays()
 
         for record in bdays:
-            if int(bdays.date[0:2]) == datetime.today().day and int(bdays[3:5]) == datetime.today().month:
-                channel = self.get_channel(record.GuildID)
-                age = datetime.today().year - int(bdays[6:])
-                await self.announce_birthday(record.GuildID, int(channel), f'<@!{record.UserID}>', age)
+            if int(record[1][0:2]) == datetime.today().day and int(record[1][3:5]) == datetime.today().month:
+                channel = self.get_announcement_channel(record[2])
+                if channel is None:
+                    general = discord.utils.get(bot.get_guild(record[2]).text_channels, name="general")
+                    await general.send(f"Please set a announcement channel with {PREFIX}channel to use the birthday "
+                                       f"announcement feature")
+                    break
+                age = datetime.today().year - int(record[1][6:])
+                await self.announce_birthday(record[2], channel, f'<@!{record[0]}>', age)
 
     async def on_connect(self):
         print(get_current_time(), "Logged in as {0.user}".format(self))
@@ -95,7 +101,7 @@ class Bot(BaseBot):
             # Checks if command looks like currency (matches numbers and periods)
             if not re.match(r'^\$[0-9\.]*$', ctx.message.content.split(' ', 1)[0]):
                 await ctx.send(f"Command not found, type {PREFIX}help for a list of commands")
-                
+
         elif isinstance(exc, BadArgument):
             await ctx.send(f"Bad argument, type {PREFIX}help for a list of commands")
         elif isinstance(exc, MissingRequiredArgument):
@@ -107,11 +113,12 @@ class Bot(BaseBot):
         elif isinstance(exc, MissingPermissions):
             await ctx.send("You don't have permission to do that")
         else:
+            await ctx.send("Something went wrong (check logs)")
             raise exc
 
     async def on_ready(self):
         if not self.ready:
-            # Daily birthday checker
+            # Daily birthday checker at noon est
             if USE_DB:
                 self.scheduler.add_job(self.birthday_trigger, CronTrigger(second="0", minute="0", hour="12"))
                 self.scheduler.start()

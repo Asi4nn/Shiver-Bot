@@ -6,7 +6,7 @@ from discord.ext.commands import has_permissions
 from re import fullmatch
 from datetime import datetime
 
-from lib.db import db_postgresql as db
+from lib.db import bot_queries
 
 from ..bot import PREFIX
 
@@ -25,12 +25,9 @@ class Birthday(Cog):
         date = date.strip()
         guild: discord.Guild = ctx.guild
         if self.validate_birthday(ctx.author.mention, date):
-            db.execute("INSERT INTO birthdays(UserID, GuildID, date) "
-                       "VALUES (%s, %s, %s) "
-                       "ON CONFLICT(UserID) "
-                       "DO UPDATE SET date = %s",
-                       ctx.author.id, ctx.guild.id, date, date)
-            await ctx.send(f"Added birthdate {date} for {ctx.author.mention}")
+            if bot_queries.set_birthday(ctx.author.id, ctx.guild.id, date):
+                return await ctx.send(f"Added birthdate {date} for {ctx.author.mention}")
+            await ctx.send(f"Failed to add birthday for {ctx.author.mention}")
         else:
             await ctx.send(f"Invalid format! (Type {PREFIX}help for syntax)")
 
@@ -41,12 +38,9 @@ class Birthday(Cog):
         mention = mention.strip()
         date = date.strip()
         if self.validate_birthday(mention, date) and ctx.guild.get_member(int(mention[3:len(mention) - 1])) is not None:
-            db.execute("INSERT INTO birthdays(UserID, GuildID, date) "
-                       "VALUES (%s, %s, %s) "
-                       "ON CONFLICT(UserID) "
-                       "DO UPDATE SET date = %s",
-                       int(mention[3:len(mention) - 1]), ctx.guild.id, date, date)
-            await ctx.send(f"Added birthdate {date} for {mention}")
+            if bot_queries.set_birthday(int(mention[3:len(mention) - 1]), ctx.guild.id, date):
+                return await ctx.send(f"Added birthdate {date} for {mention}")
+            await ctx.send(f"Failed to add birthday for {mention}")
         else:
             await ctx.send(f"Invalid format! (Type {PREFIX}help for syntax)")
 
@@ -54,8 +48,7 @@ class Birthday(Cog):
              brief="Checks birth date for the given user")
     async def birthday_check(self, ctx, mention):
         mention = mention.strip()
-        record = db.record("SELECT * FROM birthdays WHERE UserID = %s AND GuildID = %s",
-                           int(mention[3:len(mention) - 1]), ctx.guild.id)
+        record = bot_queries.get_birthday_record(int(mention[3:len(mention) - 1]), ctx.guild.id)
         if record is None:
             await ctx.send("This this user has no recorded birth date")
         else:
@@ -65,7 +58,7 @@ class Birthday(Cog):
 
     @staticmethod
     def validate_birthday(mention, date):
-        if (fullmatch("<@!\d{18}>", mention) is not None and fullmatch("\d\d/\d\d/\d\d\d\d", date) is not None
+        if (fullmatch(r"<@!\d{18}>", mention) is not None and fullmatch(r"\d\d/\d\d/\d\d\d\d", date) is not None
                 and int(date[6:]) <= datetime.today().year):
             try:
                 datetime(day=int(date[0:2]), month=int(date[3:5]), year=int(date[6:]))

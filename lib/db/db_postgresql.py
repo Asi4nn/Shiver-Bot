@@ -4,28 +4,12 @@ from sqlalchemy import create_engine
 from sqlalchemy.engine.mock import MockConnection
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 USE_DB = environ['USE_DB'].strip() == 'true'
 
-
-try:
-    DATABASE_URL = environ['DATABASE_URL']
-    split = DATABASE_URL.split("//")
-    DATABASE_URL = "postgresql+psycopg2://" + split[1]
-except KeyError:
-    DATABASE_URL = "postgresql+psycopg2://postgres:Leowang14@127.0.0.1:5432/postgres"
-
-
-if USE_DB:
-    engine = create_engine(DATABASE_URL, echo=False)
-    conn: MockConnection = engine.connect().execution_options(autocommit=True)
-else:
-    SystemExit(0)
-
-# build db
-def build():
-    conn.execute('''CREATE TABLE IF NOT EXISTS birthdays (
+BUILD_QUERY = '''CREATE TABLE IF NOT EXISTS birthdays (
                         UserID bigint PRIMARY KEY,
                         GuildID bigint,
                         date text
@@ -45,7 +29,25 @@ def build():
                         time text,
                         message text,
                         status text
-                    );''')
+                    );'''
+
+try:
+    DATABASE_URL = environ['DATABASE_URL']
+    split = DATABASE_URL.split("//")
+    DATABASE_URL = "postgresql+psycopg2://" + split[1]
+except KeyError:
+    DATABASE_URL = "postgresql+psycopg2://postgres:Leowang14@127.0.0.1:5432/postgres"
+
+if USE_DB:
+    engine = create_engine(DATABASE_URL, echo=False)
+    conn: MockConnection = engine.connect().execution_options(autocommit=True)
+else:
+    SystemExit(0)
+
+
+# build db
+def build():
+    conn.execute(BUILD_QUERY)
 
     time = datetime.now().strftime("[%H:%M:%S]")
     print(time, "Built database")
@@ -58,27 +60,7 @@ def connect():
     global conn
 
     # update db
-    conn.execute('''CREATE TABLE IF NOT EXISTS birthdays (
-                        UserID bigint PRIMARY KEY,
-                        GuildID bigint,
-                        date text
-                    );
-
-                    CREATE TABLE IF NOT EXISTS channels (
-                        GuildID bigint PRIMARY KEY,
-                        channel bigint,
-                        cmdchannel bigint
-                    );
-
-                    CREATE TABLE IF NOT EXISTS messages (
-                        MessageID bigint PRIMARY KEY,
-                        guild text,
-                        channel text,
-                        author text,
-                        time text,
-                        message text,
-                        status text
-                    );''')
+    conn.execute(BUILD_QUERY)
 
     time = datetime.now().strftime("[%H:%M:%S]")
     print(time, "Connected to Database")

@@ -1,6 +1,5 @@
 from typing import Optional
 from datetime import datetime
-from datetime import tzinfo
 from pytz import timezone
 from pytz import utc
 
@@ -35,7 +34,8 @@ class Info(Cog):
         )
         embed.set_thumbnail(url=target.avatar_url)
 
-        # discord API doesn't return their datetimes with a timezone for some reason, even though they are in UTC by default
+        # Discord API doesn't return their datetimes with a timezone for some reason,
+        # even though they are in UTC by default
         joined = target.joined_at
         created = target.created_at
         joined = utc.localize(joined)

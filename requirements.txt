@@ -32,4 +32,4 @@ tzdata==2021.5
 tzlocal==2.1
 wrapt==1.13.3
 yarl==1.6.3
-youtube-dl==2021.6.6
+youtube-dl>=2021.12.17
