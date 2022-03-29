@@ -47,7 +47,6 @@ class Bot(BaseBot):
         super().__init__(command_prefix=get_prefix, owner_ids=OWNER_IDS, intents=discord.Intents.all())
 
     def run(self):
-        # with open(sep.join(["lib", "bot", "TOKEN.txt"]), 'r', encoding="utf-8") as token:
         self.token = TOKEN
 
         self.load_cogs()
@@ -75,15 +74,15 @@ class Bot(BaseBot):
         bdays = bot_queries.get_birthdays()
 
         for record in bdays:
-            if int(record[1][0:2]) == datetime.today().day and int(record[1][3:5]) == datetime.today().month:
-                channel = self.get_announcement_channel(record[2])
+            if int(record[2][0:2]) == datetime.today().day and int(record[2][3:5]) == datetime.today().month:
+                channel = self.get_announcement_channel(record[1])
                 if channel is None:
-                    general = discord.utils.get(bot.get_guild(record[2]).text_channels, name="general")
+                    general = discord.utils.get(bot.get_guild(record[1]).text_channels, name="general")
                     await general.send(f"Please set a announcement channel with {PREFIX}channel to use the birthday "
-                                       f"announcement feature")
+                                       "announcement feature")
                     break
-                age = datetime.today().year - int(record[1][6:])
-                await self.announce_birthday(record[2], channel, f'<@!{record[0]}>', age)
+                age = datetime.today().year - int(record[2][6:])
+                await self.announce_birthday(record[1], channel, f'<@!{record[0]}>', age)
 
     async def on_connect(self):
         print(get_current_time(), "Logged in as {0.user}".format(self))
@@ -100,20 +99,20 @@ class Bot(BaseBot):
         if isinstance(exc, CommandNotFound):
             # Checks if command looks like currency (matches numbers and periods)
             if not re.match(r'^\$[0-9\.]*$', ctx.message.content.split(' ', 1)[0]):
-                await ctx.send(f"Command not found, type {PREFIX}help for a list of commands")
+                await ctx.reply(f"Command not found, type {PREFIX}help for a list of commands")
 
         elif isinstance(exc, BadArgument):
-            await ctx.send(f"Bad argument, type {PREFIX}help for a list of commands")
+            await ctx.reply(f"Bad argument, type {PREFIX}help for a list of commands")
         elif isinstance(exc, MissingRequiredArgument):
-            await ctx.send("Argument(s) are missing from command")
+            await ctx.reply("Argument(s) are missing from command")
         elif isinstance(exc, HTTPException):
-            await ctx.send("Unable to send message (likely too long)")
+            await ctx.reply("Unable to send message (likely too long)")
         elif isinstance(exc, Forbidden):
-            await ctx.send("I don't have permission to do that")
+            await ctx.reply("I don't have permission to do that")
         elif isinstance(exc, MissingPermissions):
-            await ctx.send("You don't have permission to do that")
+            await ctx.reply("You don't have permission to do that")
         else:
-            await ctx.send("Something went wrong (check logs)")
+            await ctx.reply("Something went wrong (check logs)")
             raise exc
 
     async def on_ready(self):

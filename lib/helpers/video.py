@@ -88,9 +88,9 @@ class QueryManager:
                 for video in info["entries"]:
                     video_object = Video(video["url"], requested_by)
                     new.append(video_object)
-                    await ctx.send("Added to queue.", embed=video_object.get_embed())
+                    await ctx.reply("Added to queue.", embed=video_object.get_embed())
             else:
                 video_object = Video(info, requested_by)    # passes in extracted video, not url
                 new.append(Video(info, requested_by))
-                await ctx.send("Added to queue.", embed=video_object.get_embed())
+                await ctx.reply("Added to queue.", embed=video_object.get_embed())
             return new

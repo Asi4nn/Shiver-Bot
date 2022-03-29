@@ -7,6 +7,7 @@ from discord import Message
 '''
 ONLY ENABLE THIS IF DATABASE STORAGE PERMITS
 
+I'm no longer updating this, maybe I'll make it log message history in a channel someday
 I used the bot on 2 servers for 1 month and filled 10 000 rows of my database
 '''
 

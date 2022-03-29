@@ -72,7 +72,7 @@ class Help(Cog):
             colour=ctx.author.colour
         )
         embed.add_field(name="Command description", value=command.brief)
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @command(name="help", brief="Displays info about a command or all commands in Shiver Bot")
     async def show_help(self, ctx, cmd: Optional[str]):
@@ -84,7 +84,7 @@ class Help(Cog):
             if command is not None:
                 await self.cmd_help(ctx, command)
             else:
-                await ctx.send("That command doesn't exist")
+                await ctx.reply("That command doesn't exist")
 
 
 def setup(bot):

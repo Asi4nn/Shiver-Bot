@@ -24,7 +24,7 @@ async def audio_playing(ctx):
     if client and client.channel and client.source:
         return True
     else:
-        await ctx.send("Not currently playing any audio")
+        await ctx.reply("Not currently playing any audio")
 
 
 async def in_voice_channel(ctx):
@@ -34,7 +34,7 @@ async def in_voice_channel(ctx):
     if voice and bot_voice and voice.channel and bot_voice.channel and voice.channel == bot_voice.channel:
         return True
     else:
-        await ctx.send("You need to be in the channel to do that")
+        await ctx.reply("You need to be in the channel to do that")
         return False
 
 
@@ -98,9 +98,9 @@ class Music(Cog):
         """Displays information about the current song."""
         state = self.get_state(ctx.guild)
         if state.now_playing:
-            await ctx.send("", embed=state.now_playing.get_embed())
+            await ctx.reply("", embed=state.now_playing.get_embed())
         else:
-            await ctx.send("Not currently playing")
+            await ctx.reply("Not currently playing")
 
     @command(name="queue", aliases=["q", "playlist"], brief="Displays the song queue")
     @guild_only()
@@ -108,7 +108,7 @@ class Music(Cog):
     async def queue(self, ctx):
         """Display the current play queue."""
         state = self.get_state(ctx.guild)
-        await ctx.send(self._queue_text(state.playlist, ctx))
+        await ctx.reply(self._queue_text(state.playlist, ctx))
 
     def _queue_text(self, queue, ctx):
         """Returns a block of text describing a given song queue."""
@@ -131,7 +131,7 @@ class Music(Cog):
     async def skip(self, ctx):
         client = ctx.guild.voice_client
         client.stop()
-        await ctx.send("Skipping")
+        await ctx.reply("Skipping")
 
     @command(name="remove", aliases=["r"], brief="Remove the song at the given queue index")
     @guild_only()
@@ -139,21 +139,21 @@ class Music(Cog):
     @check(in_voice_channel)
     async def remove(self, ctx: Context, index: str):
         if not index.isdigit():
-            await ctx.send("Invalid index")
+            await ctx.reply("Invalid index")
             return
 
         playlist = self.get_state(ctx.guild).playlist
         if 1 <= int(index) <= len(playlist):
             song = playlist.pop(int(index) - 1)
-            await ctx.send(f"Removing {index}. **{song.title}** request by **{song.requested_by}**")
+            await ctx.reply(f"Removing {index}. **{song.title}** request by **{song.requested_by}**")
         else:
-            await ctx.send("Invalid index")
+            await ctx.reply("Invalid index")
 
     @command(name="join", brief="Makes the bot join your voice channel if applicable")
     @guild_only()
     async def join(self, ctx: Context):
         if ctx.author.voice is None:
-            await ctx.send("You're not in a voice channel!")
+            await ctx.reply("You're not in a voice channel!")
 
         channel = ctx.author.voice.channel
         if ctx.voice_client is None:
@@ -169,7 +169,7 @@ class Music(Cog):
         state = self.get_state(ctx.guild)
         if client and client.channel:
             await client.disconnect()
-            await ctx.send(":wave: Bye!")
+            await ctx.reply(":wave: Bye!")
             state.playlist = []
             state.now_playing = None
             state.looping = False
@@ -184,7 +184,7 @@ class Music(Cog):
 
         if vc and vc.is_paused() and not url:   # resumes play if no url param
             vc.resume()
-            await ctx.send("Resumed")
+            await ctx.reply("Resumed")
             return
 
         if vc and vc.channel:
@@ -192,11 +192,11 @@ class Music(Cog):
                 new = await QueryManager.query_url(state.playlist, url, ctx.author, ctx)
             except youtube_dl.DownloadError as e:
                 print(f"Error downloading video: {e}")
-                await ctx.send("There was an error downloading your video")
+                await ctx.reply("There was an error downloading your video")
                 return
             except Exception as e:
                 print(e)
-                await ctx.send("There was an error retrieving your video")
+                await ctx.reply("There was an error retrieving your video")
                 return
             state.playlist = new
             if not vc.is_playing():
@@ -207,13 +207,13 @@ class Music(Cog):
                 try:
                     state.playlist = await QueryManager.query_url(state.playlist, url, ctx.author, ctx)
                 except youtube_dl.DownloadError as e:
-                    await ctx.send("There was an error downloading your video")
+                    await ctx.reply("There was an error downloading your video")
                     print(e)
                     return
                 client = await channel.connect()
                 self._play_song(client, state, state.playlist.pop(0))
             else:
-                await ctx.send("You need to be in a voice channel to do that")
+                await ctx.reply("You need to be in a voice channel to do that")
 
     def _play_song(self, client, state, song):
         state.now_playing = song
@@ -230,7 +230,8 @@ class Music(Cog):
                 next_song = state.playlist.pop(0)
                 self._play_song(client, state, next_song)
             # else:
-            #     asyncio.run_coroutine_threadsafe(client.disconnect(), self.bot.loop)  # changed to dc after all members leave channel
+            #     # Disconnect after done playing
+            #     asyncio.run_coroutine_threadsafe(client.disconnect(), self.bot.loop)
 
         client.play(source, after=after_playing)
 
@@ -240,7 +241,7 @@ class Music(Cog):
     async def clearqueue(self, ctx: Context):
         state = self.get_state(ctx.guild)
         state.playlist = []
-        await ctx.send("Cleared all songs in queue")
+        await ctx.reply("Cleared all songs in queue")
 
     @command(name="pause", brief="Pauses the music if applicable")
     @guild_only()
@@ -250,9 +251,9 @@ class Music(Cog):
         vc = ctx.guild.voice_client
         if not vc.is_paused():
             vc.pause()
-            await ctx.send("Paused")
+            await ctx.reply("Paused")
         else:
-            await ctx.send(f"Music bot is currently paused! (Type {PREFIX}play to resume)")
+            await ctx.reply(f"Music bot is currently paused! (Type {PREFIX}play to resume)")
 
     @command(name="loop", aliases=["repeat"], brief="Loops the current song (if applicable")
     @guild_only()
@@ -261,10 +262,10 @@ class Music(Cog):
         state = self.get_state(ctx.guild)
         if state.looping:
             state.looping = False
-            await ctx.send(":repeat: Stopped looping")
+            await ctx.reply(":repeat: Stopped looping")
         else:
             state.looping = True
-            await ctx.send(":repeat: Looping current song")
+            await ctx.reply(":repeat: Looping current song")
 
 
 def setup(bot):
