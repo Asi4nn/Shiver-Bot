@@ -2,7 +2,6 @@
 This file for storing functions to contain SQL queries to not pollute the rest of the bot code with
 ugly query strings
 """
-import logging
 from typing import List, Tuple, Union
 from lib.db import db_postgresql as db
 from sqlalchemy.exc import SQLAlchemyError
@@ -23,7 +22,7 @@ def set_channel(guild_id: int, channel_id: int) -> bool:
                    guild_id, channel_id, channel_id)
         return True
     except SQLAlchemyError as e:
-        logging.error(exc_info=e)
+        print(e)
         return False
 
 
@@ -42,7 +41,7 @@ def set_command_channel(guild_id: int, channel_id: int) -> bool:
                    guild_id, channel_id, channel_id)
         return True
     except SQLAlchemyError as e:
-        logging.error(exc_info=e)
+        print(e)
         return False
 
 
@@ -60,7 +59,7 @@ def remove_command_channel(guild_id: int) -> bool:
                    guild_id)
         return True
     except SQLAlchemyError as e:
-        logging.error(exc_info=e)
+        print(e)
         return False
 
 
@@ -73,7 +72,7 @@ def get_announcement_channel(guild_id: int) -> Union[int, None]:
     try:
         return db.field("SELECT channel FROM channels WHERE GuildID = %s", guild_id)
     except SQLAlchemyError as e:
-        logging.error(exc_info=e)
+        print(e)
         return None
 
 
@@ -86,16 +85,24 @@ def get_command_channel(guild_id: int) -> Union[int, None]:
     try:
         return db.field("SELECT cmdchannel FROM channels WHERE GuildID = %s", guild_id)
     except SQLAlchemyError as e:
-        logging.error(exc_info=e)
+        print(e)
         return None
 
 
-def get_birthdays() -> List[Tuple[int, str, int]]:
+def get_birthdays() -> List[Tuple[int, int, str]]:
     """
-    Get all birthday records in the form: (UserID, date, GuildID)
-    :return: records of all bdays
+    Get all birthday records in the form: (UserID, GuildID, date)
+    :return: records of all birthdays
     """
-    return db.records("SELECT UserID, date, GuildID FROM birthdays")
+    return db.records("SELECT * FROM birthdays")
+
+
+def get_guild_birthdays(guild_id) -> List[Tuple[int, int, str]]:
+    """
+    Get all birthday records for the given guild in the form: (UserID, GuildID, date)
+    :return: records of all birthdays
+    """
+    return db.records("SELECT * FROM birthdays WHERE GuildID = %s", guild_id)
 
 
 def get_birthday_record(user_id, guild_id) -> Union[None, Tuple[int, int, str]]:
@@ -113,10 +120,10 @@ def set_birthday(user_id: int, guild_id: int, date: str) -> bool:
     try:
         db.execute("INSERT INTO birthdays(UserID, GuildID, date) "
                    "VALUES (%s, %s, %s) "
-                   "ON CONFLICT(UserID) "
+                   "ON CONFLICT(UserID, GuildId) "
                    "DO UPDATE SET date = %s",
                    user_id, guild_id, date, date)
         return True
     except SQLAlchemyError as e:
-        logging.error(exc_info=e)
+        print(e)
         return False

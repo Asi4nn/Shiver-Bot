@@ -43,7 +43,7 @@ class General(Cog):
 
     @command(name="ping", brief="Get the latency between the bot and the server")
     async def ping(self, ctx):
-        await ctx.send(f'Pong! {round(self.bot.latency * 1000)}ms')
+        await ctx.reply(f'Pong! {round(self.bot.latency * 1000)}ms')
 
     @command(name="source", brief="Gets information about the bot with its contributors and repo")
     async def source(self, ctx):
@@ -61,70 +61,72 @@ class General(Cog):
         embed.add_field(name='Contributors:', value='https://github.com/Asi4nn/Shiver-Bot')
         for c in CONTRIBUTORS:
             embed.add_field(name=c, value=CONTRIBUTORS[c], inline=False)
-        await ctx.send(embed=embed, file=file)
+        await ctx.reply(embed=embed, file=file)
         image.close()
 
     @command(name="roll", aliases=['dice'], brief="Rolls some dice of your choice!")
     async def roll_dice(self, ctx, dice_type: str):
         if not fullmatch(r"\dd\d", dice_type):
-            await ctx.send("Invalid dice format, (use ndm, where n is the number of dice and m is the number of faces")
+            await ctx.reply("Invalid dice format, (use ndm, where n is the number of dice and m is the number of faces")
         dice, value = [int(v) for v in dice_type.lower().split("d")]
         if dice <= 0 or value <= 0:
-            await ctx.send("You can't roll negative values dummy")
+            await ctx.reply("You can't roll negative values dummy")
         elif dice > 100 or value > 100:
-            await ctx.send("Values entered too large (over 100)")
+            await ctx.reply("Values entered too large (over 100)")
         else:
             rolls = [randint(1, value) for i in range(dice)]
-            await ctx.send(" + ".join([str(r) for r in rolls]) + f" = {sum(rolls)}")
+            await ctx.reply(" + ".join([str(r) for r in rolls]) + f" = {sum(rolls)}")
 
     @roll_dice.error
     async def roll_dice_error(self, ctx, exc):
         if isinstance(exc.original, HTTPException):
-            await ctx.send("Result is too large D:")
+            await ctx.reply("Result is too large D:")
 
-    @command(name="channel", aliases=["announcement_channel"], brief="Set the channel for announcements")
+    @command(name="announcement_channel", aliases=["channel"], brief="Set the channel for announcements")
     @has_permissions(manage_guild=True)
-    async def channel(self, ctx, channel):
-        if bot_queries.set_channel(ctx.guild.id, int(channel[2: len(channel) - 1])):
-            return await ctx.send(f"Set the announcement channel to {channel}")
-        await ctx.send("Failed to set channel")
+    async def announcement_channel(self, ctx, channel):
+        if (channel in [i.mention for i in ctx.guild.text_channels] and
+                bot_queries.set_channel(ctx.guild.id, int(channel[2: len(channel) - 1]))):
+            return await ctx.reply(f"Set the announcement channel to {channel}")
+        await ctx.reply("Failed to set channel")
 
-    @command(name="command_channel", aliases=["cmd_channel"],
+    @command(name="command_channel_set", aliases=["cmd_channel_set", "cmd_channel"],
              brief="Set the channel for commands, if this is not set, users can type commands anywhere")
     @has_permissions(manage_guild=True)
-    async def command_channel(self, ctx):
-        if bot_queries.set_command_channel(ctx.guild.id, ctx.channel.id):
-            return await ctx.send(f"Set the command channel to {ctx.channel.mention}")
-        await ctx.send("Failed to set channel")
+    async def command_channel_set(self, ctx, channel):
+        if (channel in [i.mention for i in ctx.guild.text_channels] and
+                bot_queries.set_command_channel(ctx.guild.id, int(channel[2: len(channel) - 1]))):
+            return await ctx.reply(f"Set the command channel to {channel}")
+        await ctx.reply("Failed to set channel")
 
-    @command(name="removecommandchannel", aliases=["rm_cmd_channel", "remove_command_channel"],
+    @command(name="command_channel_remove", aliases=["cmd_channel_rm"],
              brief="Removes the command channel, if applicable")
     @has_permissions(manage_guild=True)
-    async def removecommandchannel(self, ctx):
+    async def command_channel_remove(self, ctx):
         if bot_queries.remove_command_channel(ctx.guild.id):
-            return await ctx.send("Removed command channel")
-        await ctx.send("Failed to remove channel")
+            return await ctx.reply("Removed command channel")
+        await ctx.reply("Failed to remove channel")
 
     # @check(is_owner)  # removing this would be a bad idea...
     @command(name="blend", brief="haha funny command")
     @has_guild_permissions(move_members=True)
     async def blend(self, ctx: Context, mention: str, amount="5"):
         if not amount.isdigit():
-            await ctx.send("Enter a valid number to blend")
+            await ctx.reply("Enter a valid number to blend")
             return
 
         if is_mention(mention):
             member = ctx.guild.get_member(int(mention[3:len(mention) - 1]))
             if not member:
-                await ctx.send("User not in guild...")
+                await ctx.reply("User not in guild...")
                 return
 
             if member.bot:
-                await ctx.send("Bots are immune to blending....")
+                await ctx.reply("Bots are immune to blending....")
                 return
 
             if member.voice:
-                await ctx.send(f"Blending {mention}")
+                await ctx.reply(f"Blending {mention}")
                 original_vc = member.voice.channel
                 channels = ctx.guild.voice_channels
                 channels.remove(original_vc)
@@ -139,9 +141,9 @@ class General(Cog):
 
                 await member.move_to(channel=original_vc)
             else:
-                await ctx.send("User not in voice!")
+                await ctx.reply("User not in voice!")
         else:
-            await ctx.send("Invalid mention!")
+            await ctx.reply("Invalid mention!")
 
 
 def setup(bot):

@@ -10,9 +10,10 @@ load_dotenv()
 USE_DB = environ['USE_DB'].strip() == 'true'
 
 BUILD_QUERY = '''CREATE TABLE IF NOT EXISTS birthdays (
-                        UserID bigint PRIMARY KEY,
+                        UserID bigint,
                         GuildID bigint,
-                        date text
+                        date text,
+                        PRIMARY KEY (UserID, GuildID)
                     );
 
                     CREATE TABLE IF NOT EXISTS channels (

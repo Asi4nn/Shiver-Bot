@@ -52,7 +52,7 @@ class Info(Cog):
         for name, value, inline in fields:
             embed.add_field(name=name, value=value, inline=inline)
 
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
     @command(name="serverinfo", aliases=["guildinfo", "si", "gi"], brief="Gets info about the server")
     async def server_info(self, ctx: Context):
@@ -79,7 +79,7 @@ class Info(Cog):
         for name, value, inline in fields:
             embed.add_field(name=name, value=value, inline=inline)
 
-        await ctx.send(embed=embed)
+        await ctx.reply(embed=embed)
 
 
 def setup(bot):
