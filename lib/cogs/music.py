@@ -46,6 +46,7 @@ class GuildState:
         self.playlist = []
         self.now_playing = None
         self.looping = False
+        self.idle = False
 
     def is_requester(self, user):
         return self.now_playing.requested_by == user
@@ -59,25 +60,47 @@ class Music(Cog):
     @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
         """Auto leave after a delay and all members have left the channel"""
-        vc = member.guild.voice_client
-        if not vc:  # if not connected do nothing
+        client = member.guild.voice_client
+        if not client:  # if not connected do nothing
             return
 
         if not member.bot:
             # check members after a member has left the bots channel
-            if before and before.channel and before.channel.id == vc.channel.id and not [m for m in before.channel.members if not m.bot]:
-                await self.check_and_disconnect(member, before.channel, vc)
+            if (before and before.channel and before.channel.id == client.channel.id
+                    and not [m for m in before.channel.members if not m.bot]):
+                await self.check_and_disconnect(member, before.channel, client)
         elif member.id == self.bot.user.id and after.channel is not None:   # check channel if bot has been moved
             if not [m for m in after.channel.members if not m.bot]:
-                await self.check_and_disconnect(member, after.channel, vc)
+                await self.check_and_disconnect(member, after.channel, client)
 
     async def check_and_disconnect(self, member, channel, vc):
         state = self.get_state(member.guild)
         await asyncio.sleep(LEAVE_DELAY)    # delay
-        if not [m for m in channel.members if not m.bot]:   # check again
-            await vc.disconnect()
-            state.playlist = []
-            state.now_playing = None
+        if await self.idle_loop(state) and not [m for m in channel.members if not m.bot]:   # check again
+            await self.disconnect(state, vc)
+
+    async def idle_loop(self, state) -> bool:
+        """
+        Idle loop for when the bot is in idle state, waiting to possible disconnect on its own
+        :param state: Guild state
+        :return: Whether or not the conditions to disconnect are met
+        """
+
+        idle_time = 0
+        state.idle = True
+        while state.idle:
+            await asyncio.sleep(1)
+            idle_time += 1
+            if idle_time >= LEAVE_DELAY:
+                return True
+        return False
+
+    async def disconnect(self, state, client):
+        state.playlist = []
+        state.now_playing = None
+        state.looping = False
+        state.idle = False
+        await client.disconnect()
 
     def get_state(self, guild) -> GuildState:
         """Gets the state for `guild`, creating it if it does not exist."""
@@ -156,10 +179,13 @@ class Music(Cog):
             await ctx.reply("You're not in a voice channel!")
 
         channel = ctx.author.voice.channel
-        if ctx.voice_client is None:
+        client = ctx.voice_client
+        if client is None:
             await channel.connect()
         else:
-            await ctx.voice_client.move_to(channel)
+            await client.move_to(channel)
+            if not client.is_playing():
+                await self.idle_loop(self.get_state(ctx.guild))
 
     @command(name="leave", aliases=["disconnect", "dc", "fuckoff"],
              brief="Makes the bot leave your voice channel if applicable")
@@ -168,26 +194,25 @@ class Music(Cog):
         client = ctx.guild.voice_client
         state = self.get_state(ctx.guild)
         if client and client.channel:
-            await client.disconnect()
             await ctx.reply(":wave: Bye!")
-            state.playlist = []
-            state.now_playing = None
-            state.looping = False
+            await self.disconnect(state, client)
 
     @command(name="play", aliases=["p"], brief="Plays a song from a YouTube url, or resumes playing if paused")
     @guild_only()
     async def play(self, ctx: Context, *, url: Optional[str]):
-        vc: discord.VoiceClient = ctx.guild.voice_client
+        client: discord.VoiceClient = ctx.guild.voice_client
         state = self.get_state(ctx.guild)
-        if vc and vc.channel and not await in_voice_channel(ctx):
+        state.idle = False
+
+        if client and client.channel and not await in_voice_channel(ctx):
             return
 
-        if vc and vc.is_paused() and not url:   # resumes play if no url param
-            vc.resume()
+        if client and client.is_paused() and not url:   # resumes play if no url param
+            client.resume()
             await ctx.reply("Resumed")
             return
 
-        if vc and vc.channel:
+        if client and client.channel:
             try:
                 new = await QueryManager.query_url(state.playlist, url, ctx.author, ctx)
             except youtube_dl.DownloadError as e:
@@ -199,8 +224,8 @@ class Music(Cog):
                 await ctx.reply("There was an error retrieving your video")
                 return
             state.playlist = new
-            if not vc.is_playing():
-                self._play_song(vc.guild.voice_client, state, state.playlist.pop(0))
+            if not client.is_playing():
+                self._play_song(client.guild.voice_client, state, state.playlist.pop(0))
         else:
             if ctx.author is not None and ctx.author.voice.channel is not None:
                 channel = ctx.author.voice.channel
@@ -220,6 +245,10 @@ class Music(Cog):
         source = discord.PCMVolumeTransformer(
             discord.FFmpegPCMAudio(song.stream_url, **FFMPEG_OPTIONS), volume=state.volume)
 
+        async def after_playing_idle():
+            if await self.idle_loop(state):
+                await self.disconnect(state, client)
+
         def after_playing(err):
             if state.looping and state.now_playing:
                 self._play_song(client, state, state.now_playing)
@@ -229,9 +258,9 @@ class Music(Cog):
             if len(state.playlist) > 0:
                 next_song = state.playlist.pop(0)
                 self._play_song(client, state, next_song)
-            # else:
-            #     # Disconnect after done playing
-            #     asyncio.run_coroutine_threadsafe(client.disconnect(), self.bot.loop)
+            else:
+                # Disconnect after done playing
+                asyncio.run_coroutine_threadsafe(after_playing_idle(), self.bot.loop)
 
         client.play(source, after=after_playing)
 
@@ -252,6 +281,7 @@ class Music(Cog):
         if not vc.is_paused():
             vc.pause()
             await ctx.reply("Paused")
+            self.get_state(ctx.guild).idle = True
         else:
             await ctx.reply(f"Music bot is currently paused! (Type {PREFIX}play to resume)")
 
