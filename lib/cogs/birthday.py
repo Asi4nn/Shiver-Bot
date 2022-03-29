@@ -8,8 +8,6 @@ from datetime import datetime
 
 from lib.db import bot_queries
 
-from ..bot import PREFIX
-
 
 class Birthday(Cog):
     def __init__(self, bot):
