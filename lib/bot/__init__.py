@@ -62,7 +62,8 @@ class Bot(BaseBot):
 
     async def announce_birthday(self, guild, channel, mention, age):
         send_channel = get(self.get_guild(guild).text_channels, id=channel)
-        await send_channel.send(f"@here Happy Birthday to {mention} who's turning {age} today!")
+        await send_channel.send(f":birthday: @here Happy Birthday to {mention} who's turning {age} today "
+                                f"{':older_adult:' if age > 18 else ':baby:'}")
 
     def get_announcement_channel(self, guild_id) -> Union[int, None]:
         return bot_queries.get_announcement_channel(guild_id)
