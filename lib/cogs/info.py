@@ -11,7 +11,6 @@ from discord.colour import Colour
 from discord.ext.commands import Context
 
 est = timezone("US/Eastern")
-utc = utc
 
 
 class Info(Cog):

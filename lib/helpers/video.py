@@ -8,6 +8,7 @@ YTDL_OPTS = {
     "default_search": "ytsearch",
     "format": "bestaudio/best",
     "quiet": True,
+    "extract-audio": True,
     "cookiefile": "cookies.txt",
     "extract_flat": "in_playlist",
     "postprocessors": [{
@@ -16,6 +17,7 @@ YTDL_OPTS = {
         "preferredquality": "192"
     }],
     "forceip": "4",
+    "verbose": True,
 }
 
 
