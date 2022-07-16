@@ -3,12 +3,11 @@ from typing import Optional, Dict
 
 import discord
 import youtube_dl
-from discord.ext.commands import Cog, command, Context, guild_only, check
+from discord.ext.commands import Cog, command, Context, guild_only, check, CommandError
 from ..bot import PREFIX
 
 from ..helpers.video import Video, QueryManager
 
-QUEUE = []
 LEAVE_DELAY = 60    # in seconds
 FFMPEG_OPTIONS = {
     'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
@@ -24,7 +23,7 @@ async def audio_playing(ctx):
     if client and client.channel and client.source:
         return True
     else:
-        await ctx.reply("Not currently playing any audio")
+        raise CommandError("Not currently playing any audio")
 
 
 async def in_voice_channel(ctx):
@@ -34,11 +33,10 @@ async def in_voice_channel(ctx):
     if voice and bot_voice and voice.channel and bot_voice.channel and voice.channel == bot_voice.channel:
         return True
     else:
-        await ctx.reply("You need to be in the channel to do that")
-        return False
+        raise CommandError("You need to be in the channel to do that")
 
 
-class GuildState:
+class GuildMusicState:
     """Helper class managing per-guild state."""
 
     def __init__(self):
@@ -55,7 +53,7 @@ class GuildState:
 class Music(Cog):
     def __init__(self, bot):
         self.bot = bot
-        self.states: Dict[GuildState] = {}
+        self.states: Dict[GuildMusicState] = {}
 
     @Cog.listener()
     async def on_voice_state_update(self, member, before, after):
@@ -102,12 +100,12 @@ class Music(Cog):
         state.idle = False
         await client.disconnect()
 
-    def get_state(self, guild) -> GuildState:
+    def get_state(self, guild) -> GuildMusicState:
         """Gets the state for `guild`, creating it if it does not exist."""
         if guild.id in self.states:
             return self.states[guild.id]
         else:
-            self.states[guild.id] = GuildState()
+            self.states[guild.id] = GuildMusicState()
             return self.states[guild.id]
 
     @Cog.listener()

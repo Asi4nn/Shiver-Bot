@@ -1,3 +1,4 @@
+from apscheduler.triggers.cron import CronTrigger
 from discord import Embed, Color, utils
 from discord.ext.commands import Cog, Context
 from discord.ext.commands import command
@@ -6,7 +7,10 @@ from discord.ext.commands import has_permissions
 from re import fullmatch
 from datetime import datetime
 
-from lib.db import bot_queries
+from discord.utils import get
+
+from lib.bot import PREFIX
+from lib.db import bot_queries, USE_DB
 
 
 class Birthday(Cog):
@@ -15,7 +19,30 @@ class Birthday(Cog):
 
     @Cog.listener()
     async def on_ready(self):
+        # Daily birthday checker at noon est
+        if USE_DB:
+            self.bot.scheduler.add_job(self.birthday_trigger, CronTrigger(second="0", minute="0", hour="12"))
+            self.bot.scheduler.start()
+
         print("Birthday cog ready")
+
+    async def announce_birthday(self, guild, channel, mention, age):
+        send_channel = get(self.bot.get_guild(guild).text_channels, id=channel)
+        await send_channel.send(f":birthday: @here Happy Birthday to {mention} who's turning {age} today!")
+
+    async def birthday_trigger(self):
+        bdays = bot_queries.get_birthdays()
+
+        for record in bdays:
+            if int(record[2][0:2]) == datetime.today().day and int(record[2][3:5]) == datetime.today().month:
+                channel = self.bot.get_announcement_channel(record[1])
+                if channel is None:
+                    general = get(self.bot.get_guild(record[1]).text_channels, name="general")
+                    await general.send(f"Please set a announcement channel with {PREFIX}channel to use the birthday "
+                                       "announcement feature")
+                    break
+                age = datetime.today().year - int(record[2][6:])
+                await self.announce_birthday(record[1], channel, f'<@!{record[0]}>', age)
 
     @command(name="birthday", aliases=["bday"], brief="Saves your birthday info and adds notification on that date, "
                                                       "date must be in the form DD/MM/YYYY")
