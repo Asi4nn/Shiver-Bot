@@ -1,13 +1,13 @@
 from random import randint, choice
 from re import fullmatch
 
-from discord import Embed, Colour, File
+from discord import Embed, Colour, File, Guild
 from discord import utils
 from discord.errors import HTTPException, Forbidden
 from discord.ext.commands import Cog, Context, command, has_permissions, has_guild_permissions
 
 from lib.bot import OWNER_IDS, PREFIX
-from lib.helpers.is_mention import is_mention
+from lib.helpers.is_mention import is_mention, get_mention_id
 from lib.db import bot_queries
 
 from time import sleep
@@ -33,10 +33,10 @@ class General(Cog):
         print("General cog ready")
 
     @Cog.listener()
-    async def on_guild_join(self, guild):
+    async def on_guild_join(self, guild: Guild):
         general = utils.get(guild.text_channels, name="general")
         if general is not None:
-            bot_queries.set_channel(general.id)
+            bot_queries.set_channel(guild.id, general.id)
 
         await guild.text_channels[0].send("No general channel found! Set an announcement channel using "
                                           f"{PREFIX}channel")
@@ -116,7 +116,7 @@ class General(Cog):
             return
 
         if is_mention(mention):
-            member = ctx.guild.get_member(int(mention[3:len(mention) - 1]))
+            member = ctx.guild.get_member(get_mention_id(mention))
             if not member:
                 await ctx.reply("User not in guild...")
                 return

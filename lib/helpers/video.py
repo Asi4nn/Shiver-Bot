@@ -1,8 +1,8 @@
 import youtube_dl as ytdl
-import discord
 import time
 from typing import List
 from discord.ext.commands import Context
+from discord import Embed, Colour
 
 YTDL_OPTS = {
     "default_search": "ytsearch",
@@ -11,13 +11,6 @@ YTDL_OPTS = {
     "extract-audio": True,
     "cookiefile": "cookies.txt",
     "extract_flat": "in_playlist",
-    "postprocessors": [{
-        "key": "FFmpegExtractAudio",
-        "preferredcodec": "mp3",
-        "preferredquality": "192"
-    }],
-    "forceip": "4",
-    "verbose": True,
 }
 
 
@@ -54,8 +47,8 @@ class Video:
 
     def get_embed(self):
         """Makes an embed out of this Video's information."""
-        embed = discord.Embed(
-            title=self.title, description=self.uploader, url=self.video_url, colour=discord.Colour.blue())
+        embed = Embed(
+            title=self.title, description=self.uploader, url=self.video_url, colour=Colour.blue())
         embed.set_footer(
             text=f"Requested by {self.requested_by.name}",
             icon_url=self.requested_by.avatar_url)
